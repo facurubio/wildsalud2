@@ -61,7 +61,7 @@ y de las decisiones de diseño de [decisiones.md](../decisiones.md).
 | CU-24 | Dar de baja el plan de una mascota |
 | CU-25 | Cancelar cambio pendiente |
 | CU-26 | Registrar pago |
-| CU-27 | Registrar pago de deuda congelada |
+| ~~CU-27~~ | ~~Registrar pago de deuda congelada~~ — unido a CU-26 Registrar pago |
 | CU-28 | Anular pago |
 | CU-29 | Corregir pago |
 | CU-30 | Corregir consumo |
@@ -99,3 +99,4 @@ y de las decisiones de diseño de [decisiones.md](../decisiones.md).
 | CU-47 | Enviar aviso de vencimiento |
 | CU-48 | Enviar aviso de suspensión |
 | CU-49 | Enviar aviso de baja inminente |
+| CU-50 | Enviar aviso de baja por deuda |

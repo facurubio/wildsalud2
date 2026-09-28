@@ -21,6 +21,12 @@ las secciones las agrupan por tema.
 | D39 | Corrección de pagos        | El pago **no se edita**: se **anula** el original (con motivo) y se registra un **pago nuevo** enlazado al anulado.                                                                                                                                               |
 | D53 | Hora de referencia         | Todas las reglas de fecha (vencimiento del 13, suspensión del 14, cambio de mes y de año, avisos) usan la **hora de Argentina**. |
 | D54 | Estado calculado en el momento | El estado de cobertura se **calcula con la fecha y hora de cada operación o consulta**; no depende de que los procesos automáticos (suspensión, baja por deuda, cambios programados) ya se hayan ejecutado. |
+| D57 | Fecha de pago | Es la fecha en que el dueño pagó: por defecto hoy, puede ser anterior pero **nunca posterior** a hoy. Es **informativa**: la cobertura se crea o se reactiva en el momento en que se registra el pago, no en esa fecha. |
+| D58 | Importe del pago | **No es editable**: lo calcula el sistema según el plan y el período (D6). |
+| D63 | Varios períodos en una operación | El administrador puede pagar **varios períodos en una sola operación**, siempre consecutivos y **empezando por el más antiguo**. Se registra un pago por período. |
+| D65 | Primer pago de una cobertura | **No se puede anular** el primer pago de una cobertura (el que se registra al asignar el plan). |
+| D66 | Datos corregibles de un pago | Solo se corrigen **fecha de pago**, **forma de pago** y **mascota**. El período y el importe los calcula el sistema. |
+| D59 | Formas de pago | **Lista fija**: Efectivo, Transferencia bancaria, Tarjeta de débito y Tarjeta de crédito. |
 
 ## Deuda y baja automática
 
@@ -33,6 +39,9 @@ las secciones las agrupan por tema.
 | D28 | Pago de deuda congelada          | Se paga **período por período**, del más antiguo al más nuevo. Mientras quede deuda no se puede crear una cobertura nueva. Esos pagos **no suman antigüedad** a la cobertura nueva.                              |
 | D29 | Deuda y otras mascotas del dueño | Si el dueño tiene deuda de **cualquiera** de sus mascotas, **no se puede dar de alta** otra mascota suya.                                                                                                        |
 | D38 | Qué cuenta como deuda            | **Cualquier** período impago y vencido: tanto de una cobertura suspendida como la deuda congelada de una cobertura dada de baja.                                                                                 |
+| D55 | Deuda del dueño y asignación de planes | Si el dueño tiene deuda de cualquiera de sus mascotas, **no se puede asignar un plan a ninguna** de sus mascotas: ni al dar de alta una mascota nueva ni al volver a asignar un plan a una que ya existía. |
+| D64 | Deuda congelada de mascota o dueño dados de baja | La deuda congelada **se puede pagar aunque la mascota o el dueño estén dados de baja**. Es la única forma de que el dueño deje de estar bloqueado por esa deuda. |
+| D67 | Pagos parciales y plazo de baja | Pagar una parte de la deuda **no reinicia ni extiende** el plazo de 3 meses para la baja por deuda: se sigue contando desde la misma fecha de suspensión. |
 
 ## Estado de la cobertura
 
@@ -43,6 +52,7 @@ las secciones las agrupan por tema.
 | D16 | Estados de cobertura             | **Al día**, **Suspendida por falta de pago** y **Dada de baja**. La baja guarda un **motivo** aparte: _voluntaria_, _por deuda_ o _por baja de la mascota_.                                                |
 | D17 | Del día 1 al 13 sin pagar        | La cobertura sigue **al día** hasta el 13 inclusive y se pueden registrar consumos. Si no se paga, el mes pasa a ser deuda.                                                                                |
 | D18 | Baja voluntaria del plan         | Rige desde el **1 del mes siguiente** (baja programada): el mes ya pagado se mantiene cubierto. Si la cobertura está suspendida, la baja es **inmediata**.                                                 |
+| D62 | Baja programada con el mes impago | Si la baja se programa entre el 1 y el 13 sin haber pagado el mes y el dueño no paga, la cobertura **se suspende el 14** y la baja **se aplica igual el día 1** del mes siguiente. Ese mes queda como **deuda congelada**. La suspensión no convierte la baja programada en inmediata. |
 
 ## Planes y cambios de plan
 
@@ -51,6 +61,9 @@ las secciones las agrupan por tema.
 | D19 | Cambio de plan con deuda | Solo se puede cambiar el plan de una cobertura **al día**.                                                                                                                |
 | D20 | Cambios pendientes       | Puede haber **un solo cambio pendiente** por mascota (cambio de plan o baja programada); el administrador puede cancelarlo o reemplazarlo antes de que entre en vigencia. |
 | D21 | Plan inactivo            | Un plan inactivo **no se puede asignar** a nuevas mascotas; las que ya lo tienen **lo conservan**.                                                                        |
+| D56 | Plan recién creado | Un plan creado a mitad de mes **se puede asignar de inmediato**, con el precio con el que se creó. |
+| D60 | Suspensión y cambio de plan pendiente | Cuando una cobertura se suspende (el día 14 o por la anulación de un pago), **se cancela automáticamente su cambio de plan pendiente**. Si después el dueño salda la deuda, el administrador lo vuelve a programar. Una baja programada **no** se cancela (ver D62). |
+| D61 | Desactivar un plan con cambios pendientes | Al desactivar un plan **se cancelan los cambios pendientes hacia ese plan**. Antes de confirmar, el sistema le muestra al administrador qué mascotas se ven afectadas, igual que en la baja de un dueño (D22). |
 | D31 | Tipos de prestación      | Es un **catálogo que gestiona el administrador**; arranca con los 7 del documento y se pueden agregar otros.                                                              |
 | D32 | Prestaciones sin límite  | El límite es **opcional**: vacío significa ilimitada. Las demás validaciones se aplican igual.                                                                            |
 
@@ -102,6 +115,7 @@ las secciones las agrupan por tema.
 | --- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D25 | Notificaciones adicionales | Además del aviso 48 hs antes del vencimiento (día 11), se avisa cuando la cobertura **se suspende** y un mes antes de la **baja automática**.                              |
 | D43 | Canal de notificaciones    | **Solo email** en una primera etapa, detrás de un mecanismo reemplazable para sumar WhatsApp sin tocar el núcleo. Se guarda canal y resultado (éxito/fallo) de cada envío. |
+| D68 | Aviso de baja por deuda | Además del aviso un mes antes (D25), se envía un **aviso al dueño el día en que la cobertura se da de baja por deuda**. |
 
 ## Alcance
 
