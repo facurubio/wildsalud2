@@ -7,13 +7,22 @@ y de las decisiones de diseño de [decisiones.md](../decisiones.md).
 
 - **Un caso de uso por acción** (por ejemplo, dar de alta, editar y dar de baja son casos distintos).
 - **Un archivo por caso de uso** en esta carpeta, con el nombre `CU-NN-nombre-del-caso.md`.
-- **Mismo nivel de detalle** para todos los casos.
-- **Formato combinado:**
-  - una **ficha** de caso de uso (actor, precondiciones, disparador, flujo principal, flujos alternativos, postcondiciones y reglas de negocio);
-  - **escenarios BDD** en Gherkin, con palabras clave en **inglés** (`Feature`, `Scenario`, `Given`, `When`, `Then`), como criterios de aceptación que luego se convierten en casos de prueba. Cada flujo alternativo y cada excepción de la ficha tiene al menos un escenario.
-- **Trazabilidad:** cada caso cita los requisitos (`RF-…`, `RNF-…`) y las decisiones (`Dn`) en que se basa, y cada escenario lleva esas referencias como etiquetas (por ejemplo `@RF-PRE-04 @D17`).
+- **Formato combinado:** una **ficha** de caso de uso y **escenarios BDD** en Gherkin que luego se convierten en casos de prueba.
+- **Estructura de cada archivo**, en este orden:
+  1. Encabezado (actor principal, objetivo, disparador, relaciones con otros casos)
+  2. Precondiciones
+  3. Flujo principal (pasos numerados)
+  4. Flujos alternativos (`FA-NN`): situaciones que terminan bien
+  5. Excepciones (`EX-NN`): situaciones rechazadas, cada una con el **mensaje exacto** que muestra el sistema
+  6. Postcondiciones (éxito y fracaso)
+  7. Reglas de negocio (`RN-NN`), cada una con su origen (requisitos y decisiones)
+  8. Datos que se registran (cuando el caso crea o modifica información)
+  9. Escenarios de aceptación en Gherkin
+  10. Trazabilidad (requisito o decisión → paso, regla o escenario que lo cubre)
+- **Gherkin:** palabras clave en **inglés** (`Feature`, `Background`, `Scenario`, `Scenario Outline`, `Given`, `When`, `Then`, `Examples`) y texto de los pasos en **español**. Cada flujo alternativo, excepción y regla relevante tiene al menos un escenario; los casos límite se escriben como `Scenario Outline` con `Examples`.
+- **Etiquetas:** el `Feature` lleva el ID del caso (`@CU-39`) y cada escenario lleva el flujo que prueba (`@FA-01`, `@EX-04`, `@RN-02`) más los requisitos y decisiones que cubre (`@RF-PRE-04 @D17`).
+- **Mismo nivel de detalle** para todos los casos. El caso de referencia es [CU-39 Registrar consumo](CU-39-registrar-consumo.md).
 - **Diagrama:** diagrama UML de casos de uso en PlantUML, con una imagen SVG exportada.
-- La plantilla definitiva se valida con un caso de ejemplo (CU-39 Registrar consumo) antes de escribir el resto.
 
 ## Lista de casos de uso
 

@@ -19,6 +19,8 @@ las secciones las agrupan por tema.
 | D7  | Forma de pago              | El dueño tiene una **forma de pago preferida** (se propone por defecto); cada pago guarda la forma **real** usada.                                                                                                                                                |
 | D36 | Anulación de un pago       | Si al anular un pago el período queda impago y vencido, la cobertura **se suspende en ese momento**. Los consumos registrados mientras tanto **siguen siendo válidos** y quedan auditados.                                                                        |
 | D39 | Corrección de pagos        | El pago **no se edita**: se **anula** el original (con motivo) y se registra un **pago nuevo** enlazado al anulado.                                                                                                                                               |
+| D53 | Hora de referencia         | Todas las reglas de fecha (vencimiento del 13, suspensión del 14, cambio de mes y de año, avisos) usan la **hora de Argentina**. |
+| D54 | Estado calculado en el momento | El estado de cobertura se **calcula con la fecha y hora de cada operación o consulta**; no depende de que los procesos automáticos (suspensión, baja por deuda, cambios programados) ya se hayan ejecutado. |
 
 ## Deuda y baja automática
 
@@ -106,3 +108,5 @@ las secciones las agrupan por tema.
 | #   | Tema           | Decisión                                                                                                                               |
 | --- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | D48 | Pagos en línea | **MercadoPago queda fuera de alcance**: los pagos son manuales. El diseño queda preparado para integrarlo después sin tocar el núcleo. |
+| D51 | Unidad de consumo | Cada consumo registrado **descuenta una unidad** de la prestación. No hay campo de cantidad. |
+| D52 | Historia clínica | La **historia clínica queda fuera de alcance**: el consumo no lleva observaciones ni texto libre del veterinario. |
