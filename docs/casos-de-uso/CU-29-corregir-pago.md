@@ -10,7 +10,7 @@
 ## Precondiciones
 
 1. El administrador inició sesión (CU-02).
-2. El pago existe y está *Válido*.
+2. El pago existe, está *Válido* y no es el primer pago de su cobertura.
 
 ## Flujo principal
 
@@ -45,7 +45,7 @@ En todas las excepciones **no se anula ni se registra nada**: el pago original s
 | **EX-05** | 6 | La fecha de pago nueva es posterior a hoy. | *"La fecha de pago no puede ser posterior a hoy."* |
 | **EX-06** | 6 | El pago ya fue anulado o corregido por otro administrador. | *"El pago ya está anulado."* |
 | **EX-07** | 5 | La misma confirmación llega dos veces. | La corrección se aplica **una sola** vez. |
-| **EX-08** | 6 | Se intenta cambiar la mascota del primer pago de una cobertura. | *"No se puede cambiar la mascota del primer pago de una cobertura."* |
+| **EX-08** | 1 | El pago es el primero de la cobertura. | *"No se puede corregir el primer pago de una cobertura."* |
 
 ## Postcondiciones
 
@@ -61,7 +61,7 @@ En todas las excepciones **no se anula ni se registra nada**: el pago original s
 | **RN-03** | **Misma mascota, mismo período.** Si no se cambia la mascota, el pago nuevo es del mismo período que el anulado. Como la operación es única, la cobertura **no pasa por suspendida** en el medio. | D39, D54 |
 | **RN-04** | **Reglas de pago para la mascota nueva.** Si se cambia la mascota, el pago nuevo tiene que cumplir todas las reglas de CU-26, incluido el flujo de deuda congelada si la mascota nueva solo tiene deuda congelada. | RF-PAG-06, RF-PAG-13, D5 |
 | **RN-05** | **Auditoría completa.** Se registra el valor anterior, el valor nuevo, el administrador, la fecha y hora y el motivo. | RF-PAG-11, RF-ROL-13, RNF-INT-03 |
-| **RN-06** | **Primer pago de la cobertura.** Del primer pago se pueden corregir la fecha y la forma de pago, pero **no la mascota**: eso equivaldría a anularlo en la cobertura original, y el primer pago no se anula. | D65 |
+| **RN-06** | **El primer pago no se corrige.** El primer pago de una cobertura (el que se registró al asignar el plan) no se puede corregir de ninguna manera. | D65 |
 
 ## Datos que se registran
 
@@ -135,16 +135,18 @@ Feature: CU-29 Corregir pago
     Then el pago original sigue "Válido"
     And el sistema informa "La fecha de pago no puede ser posterior a hoy."
 
-  @RN-06 @D65
-  Scenario Outline: Corrección del primer pago de una cobertura
+  @EX-08 @RN-06 @D65
+  Scenario Outline: El primer pago de una cobertura no se corrige
     Given la cobertura de "Luna" se creó el "15/05/2026" con el pago del período "2026-05"
-    When el administrador corrige el pago del período "2026-05" de "Luna" cambiando <dato> con motivo "Error de carga"
-    Then el resultado es "<resultado>"
+    When el administrador intenta corregir el pago del período "2026-05" de "Luna" cambiando <dato> con motivo "Error de carga"
+    Then el pago sigue "Válido" sin cambios
+    And el sistema informa "No se puede corregir el primer pago de una cobertura."
 
     Examples:
-      | dato                                        | resultado                                                          |
-      | la forma de pago a "Tarjeta de débito"      | pago corregido                                                     |
-      | la mascota a "Toby"                         | No se puede cambiar la mascota del primer pago de una cobertura.   |
+      | dato                                   |
+      | la fecha de pago a "14/05/2026"        |
+      | la forma de pago a "Tarjeta de débito" |
+      | la mascota a "Toby"                    |
 
   @EX-07 @RNF-INT-01
   Scenario: Una confirmación enviada dos veces corrige una sola vez

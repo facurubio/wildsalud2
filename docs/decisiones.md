@@ -24,7 +24,7 @@ las secciones las agrupan por tema.
 | D57 | Fecha de pago | Es la fecha en que el dueño pagó: por defecto hoy, puede ser anterior pero **nunca posterior** a hoy. Es **informativa**: la cobertura se crea o se reactiva en el momento en que se registra el pago, no en esa fecha. |
 | D58 | Importe del pago | **No es editable**: lo calcula el sistema según el plan y el período (D6). |
 | D63 | Varios períodos en una operación | El administrador puede pagar **varios períodos en una sola operación**, siempre consecutivos y **empezando por el más antiguo**. Se registra un pago por período. |
-| D65 | Primer pago de una cobertura | **No se puede anular** el primer pago de una cobertura (el que se registra al asignar el plan). |
+| D65 | Primer pago de una cobertura | El primer pago de una cobertura (el que se registra al asignar el plan) **no se puede anular ni corregir de ninguna manera**. |
 | D66 | Datos corregibles de un pago | Solo se corrigen **fecha de pago**, **forma de pago** y **mascota**. El período y el importe los calcula el sistema. |
 | D59 | Formas de pago | **Lista fija**: Efectivo, Transferencia bancaria, Tarjeta de débito y Tarjeta de crédito. |
 

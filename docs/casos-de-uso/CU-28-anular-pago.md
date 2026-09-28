@@ -57,7 +57,7 @@
 | **RN-06** | **Las reglas no se saltean.** Anular no permite dejar la cobertura en un estado que las reglas no admiten: el estado siempre se recalcula con las reglas generales. | RF-ROL-14 |
 | **RN-07** | **Huecos en la deuda.** Si se anula un período intermedio, ese período pasa a ser el más antiguo impago y es el primero que se paga en CU-26. | D5 |
 | **RN-08** | **La suspensión cancela el cambio de plan pendiente.** Si la anulación suspende la cobertura, su cambio de plan pendiente se cancela automáticamente. Una baja programada se mantiene. | D60, D62 |
-| **RN-09** | **El primer pago no se anula.** El pago que se registró al asignar el plan (CU-22) no se puede anular. Su fecha o forma de pago se pueden corregir con CU-29. | D65 |
+| **RN-09** | **El primer pago no se anula.** El pago que se registró al asignar el plan (CU-22) no se puede anular ni corregir. | D65 |
 
 ## Datos que se registran
 
