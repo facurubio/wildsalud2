@@ -124,3 +124,24 @@ las secciones las agrupan por tema.
 | D48 | Pagos en línea | **MercadoPago queda fuera de alcance**: los pagos son manuales. El diseño queda preparado para integrarlo después sin tocar el núcleo. |
 | D51 | Unidad de consumo | Cada consumo registrado **descuenta una unidad** de la prestación. No hay campo de cantidad. |
 | D52 | Historia clínica | La **historia clínica queda fuera de alcance**: el consumo no lleva observaciones ni texto libre del veterinario. |
+
+## Consultas del veterinario
+
+| # | Tema | Decisión |
+|---|------|----------|
+| D69 | Búsqueda de mascotas | Se busca por **nombre de la mascota**, **número de afiliado**, **DNI del dueño** o **apellido del dueño**. Número de afiliado y DNI: coincidencia exacta. Nombre y apellido: coincidencia parcial con un mínimo de **3 letras**. Los resultados se muestran **paginados** de a 20. |
+| D70 | Datos en los resultados de búsqueda | Los resultados **no muestran el DNI ni el teléfono** del dueño; se ven recién en la ficha. |
+| D71 | Accesos a fichas | **No se registra** en la auditoría cuándo un veterinario abre una ficha. |
+| D72 | Lo que no ve el veterinario en la ficha | No ve el **historial de consumos** de períodos anteriores ni los **cambios de plan pendientes**; solo los consumos del período en curso. |
+| D73 | Mascotas que aparecen en la búsqueda | Todas las mascotas **no dadas de baja**, tengan o no cobertura vigente, cada una con su estado (*Al día*, *Suspendida por falta de pago* o *Sin cobertura vigente*). Las dadas de baja no aparecen. |
+
+## Consultas y datos del dueño
+
+| # | Tema | Decisión |
+|---|------|----------|
+| D74 | Lo que ve el dueño de cada mascota | Plan, estado de cobertura, si la **cuota del mes** está paga o pendiente, **cuánto debe** (para reactivar o por deuda congelada) y los **cambios pendientes**. No ve el historial de pagos. |
+| D75 | Dirección y teléfono | La dirección se guarda **estructurada**: calle, número, piso y departamento (opcionales), localidad, provincia y código postal. El teléfono se valida **con código de área**. |
+| D76 | Auditoría de datos personales | Los cambios de **teléfono y dirección** quedan auditados con valor anterior, valor nuevo, usuario, fecha y hora. |
+| D77 | Alertas en la aplicación | Se **calculan en el momento** según la situación de cada mascota y desaparecen solas cuando esa situación termina. No se guardan ni se marcan como leídas. |
+| D78 | Alerta de vencimiento próximo | Se muestra **del día 11 al 13** inclusive, con la cuota del mes impaga (igual que el email de 48 hs antes). |
+| D79 | Consumos que ve el dueño | El dueño ve **solo los consumos del período en curso** de cada prestación. No ve consumos de períodos anteriores ni de coberturas anteriores. |
