@@ -211,3 +211,20 @@ las secciones las agrupan por tema. Un número que no aparece corresponde a una 
 | # | Tema | Decisión |
 |---|------|----------|
 | D115 | Deuda de mascotas dadas de baja | En "Mis mascotas" (CU-40) hay una sección **Mascotas dadas de baja** con cada una y su deuda pendiente, si tiene. Además, mientras exista esa deuda, se muestra una **alerta** (CU-43) porque bloquea asignar planes a sus mascotas (D55). |
+
+## Planes y catálogo de prestaciones
+
+| # | Tema | Decisión |
+|---|------|----------|
+| D126 | Validaciones del plan | El nombre es único entre los planes **no eliminados** (activos o inactivos), sin distinguir mayúsculas ni acentos. El precio es mayor que cero. El plan tiene al menos una prestación y ningún tipo se repite. El límite es un entero mayor que cero o vacío (ilimitada). Los períodos pagos para habilitarla son 1 o más. |
+| D127 | Una sola versión pendiente | Si el plan se edita varias veces antes del día 1, cada edición reemplaza a la versión pendiente anterior. La versión pendiente se puede descartar. |
+| D128 | Nombre del plan | Cambia en el momento, sin versión nueva, porque no es una condición del plan. |
+| D129 | Edición de planes inactivos | Se pueden editar, porque las mascotas que ya los tienen los conservan (D21). |
+| D130 | Aviso al desactivar un plan | No se envía email a los dueños cuyo cambio pendiente se cancela; el administrador ve la lista antes de confirmar. |
+| D131 | Reactivar un plan | Los cambios de plan cancelados al desactivarlo no se restauran. |
+| D132 | Datos del tipo de prestación | Solo nombre (obligatorio, único, hasta 40 caracteres) y descripción (opcional, hasta 200). Límite, periodicidad y habilitación son de cada plan. |
+| D133 | Baja de tipos de prestación | Los tipos no se dan de baja; para dejar de cubrir uno se lo quita de los planes. |
+| D134 | Eliminar plan | Se agrega **CU-52 Eliminar plan**. Solo se puede eliminar un plan **inactivo**. La eliminación es lógica: el plan desaparece de las listas y su nombre queda libre para crear otro plan. |
+| D135 | Renombrar un tipo de prestación | El nombre corregido se ve **en todo el sistema**, incluidos los consumos y planes anteriores, porque es el mismo tipo. El nombre anterior queda en la auditoría. |
+| D136 | Eliminar un plan en uso | No se puede eliminar un plan mientras alguna mascota lo tenga en una cobertura vigente. |
+| D137 | Eliminar es definitivo | Un plan eliminado no se puede restaurar. |

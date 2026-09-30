@@ -56,6 +56,7 @@ y de las decisiones de diseño de [decisiones.md](../decisiones.md).
 | CU-17 | Editar plan |
 | CU-18 | Desactivar plan |
 | CU-19 | Reactivar plan |
+| CU-52 | Eliminar plan |
 | CU-20 | Crear tipo de prestación |
 | CU-21 | Editar tipo de prestación |
 | CU-22 | Asignar plan a una mascota |
