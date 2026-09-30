@@ -9,7 +9,7 @@
 
 ## Precondiciones
 
-1. El dueño inició sesión y su cuenta está **Activa** (CU-02).
+1. El dueño inició sesión y su cuenta está en estado **Activo** (CU-02).
 2. La mascota es del dueño y no está dada de baja.
 
 ## Flujo principal
@@ -31,7 +31,7 @@
 
 | ID | Paso | Situación | Mensaje |
 |----|------|-----------|---------|
-| **EX-01** | 1 | La mascota no es del dueño. | *"No tenés acceso a esta información."* No se muestra ningún dato. |
+| **EX-01** | 1 | La mascota no es del dueño. | *"No tenés permiso para hacer esta operación."* No se muestra ningún dato. |
 | **EX-02** | 1 | La cuenta del dueño fue desactivada mientras tenía la sesión abierta. | *"Tu cuenta está inactiva. Comunicate con WildSalud."* |
 
 ## Postcondiciones
@@ -61,7 +61,7 @@ Feature: CU-41 Consultar prestaciones disponibles/consumidas
 
   Background:
     Given la fecha y hora actual es "20/10/2026 10:00", salvo que el escenario indique otra
-    And la dueña "Carla Gómez" tiene la cuenta "Activa" e inició sesión
+    And la dueña "Carla Gómez" tiene la cuenta en estado "Activo" e inició sesión
     And existe el plan "Plan Base" con las prestaciones:
       | prestación  | límite | periodicidad | habilitada desde (períodos pagos) |
       | Consulta    | 2      | mensual      | 1                                 |
@@ -122,7 +122,7 @@ Feature: CU-41 Consultar prestaciones disponibles/consumidas
     Given "Pedro Sosa" tiene la mascota "Rocco"
     When "Carla Gómez" intenta consultar las prestaciones de "Rocco"
     Then no ve ningún dato
-    And el sistema informa "No tenés acceso a esta información."
+    And el sistema informa "No tenés permiso para hacer esta operación."
 
   @EX-02
   Scenario: Cuenta desactivada con la sesión abierta
@@ -144,3 +144,4 @@ Feature: CU-41 Consultar prestaciones disponibles/consumidas
 | D35, D40 | RN-02 |
 | D53, D54 | RN-06 |
 | D79 | Paso 4, RN-05 |
+| D110 | EX-01 (mensaje de permiso) |

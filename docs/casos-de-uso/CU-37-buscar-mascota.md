@@ -5,15 +5,15 @@
 | **Actor principal** | Veterinario asociado |
 | **Objetivo** | Identificar rápidamente a la mascota que está atendiendo, para abrir su ficha. |
 | **Disparador** | Llega a la consulta una mascota que dice estar afiliada a WildSalud. |
-| **Relaciones** | Desde un resultado se abre CU-38 Consultar ficha y cobertura. |
+| **Relaciones** | Es la pantalla de inicio del veterinario después de iniciar sesión (CU-02). Desde un resultado se abre CU-38 Consultar ficha y cobertura. |
 
 ## Precondiciones
 
-1. El veterinario inició sesión y su cuenta está **Activa** (CU-02).
+1. El veterinario inició sesión y su cuenta está en estado **Activo** (CU-02).
 
 ## Flujo principal
 
-1. El veterinario elige **Buscar mascota**.
+1. El veterinario elige **Buscar mascota**, o llega a esta pantalla al iniciar sesión.
 2. El sistema muestra un único campo de búsqueda.
 3. El veterinario escribe el número de afiliado de la mascota, el DNI del dueño, el nombre de la mascota o el apellido del dueño.
 4. El sistema valida la búsqueda (**RN-02**) y busca entre las mascotas **no dadas de baja** (**RN-01**).
@@ -63,7 +63,7 @@ Feature: CU-37 Buscar mascota
   Para abrir su ficha y ver su cobertura
 
   Background:
-    Given el veterinario "Ana López" de la veterinaria "Patitas" tiene la cuenta "Activa" e inició sesión
+    Given el veterinario "Ana López" de la veterinaria "Patitas" tiene la cuenta en estado "Activo" e inició sesión
     And existen las mascotas:
       | mascota | afiliado | especie | dueño         | DNI dueño | estado de la mascota | cobertura                    |
       | Luna    | 000123   | Perro   | Carla Gómez   | 30111222  | Activa               | Al día                       |
@@ -163,3 +163,4 @@ Feature: CU-37 Buscar mascota
 | D69 | RN-02, RN-04, FA-03, EX-01 |
 | D70 | RN-03 |
 | D54 | RN-05 |
+| D109 | Relaciones, paso 1 (pantalla de inicio del veterinario) |

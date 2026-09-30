@@ -5,17 +5,17 @@
 | **Actor principal** | Administrador |
 | **Objetivo** | Crear una cobertura para una mascota con un plan, registrando en el mismo acto el pago de la cuota del mes en curso. |
 | **Disparador** | Se da de alta una mascota nueva, o una mascota sin cobertura vigente (su plan anterior fue dado de baja) vuelve a contratar un plan. |
-| **Relaciones** | Incluido por CU-13 Dar de alta mascota (`«include»`). También se inicia solo desde la ficha de una mascota sin cobertura vigente. La deuda de una cobertura anterior se paga en CU-26 Registrar pago. |
+| **Relaciones** | Incluido por CU-13 Dar de alta mascota y por CU-51 Reactivar mascota (`«include»`). También se inicia solo desde la ficha de una mascota sin cobertura vigente. La deuda de una cobertura anterior se paga en CU-26 Registrar pago. |
 
 ## Precondiciones
 
 1. El administrador inició sesión (CU-02).
-2. La mascota está registrada y no está dada de baja.
+2. La mascota está registrada y no está dada de baja, o se está dando de alta en CU-13 o reactivando en CU-51 (en esos casos, la mascota se crea o se reactiva en la misma operación).
 3. La mascota no tiene una cobertura vigente (nunca tuvo una o la última está *Dada de baja*).
 
 ## Flujo principal
 
-1. El administrador elige **Asignar plan** desde la ficha de la mascota (o el paso llega incluido desde CU-13).
+1. El administrador elige **Asignar plan** desde la ficha de la mascota (o el paso llega incluido desde CU-13 o CU-51).
 2. El sistema muestra los planes **activos**, cada uno con su precio para el mes en curso.
 3. El administrador elige un plan.
 4. El sistema muestra el primer pago a registrar: período (mes en curso), importe y forma de pago, con la forma de pago preferida del dueño propuesta por defecto, y la fecha de pago, con la fecha de hoy propuesta por defecto.
@@ -30,7 +30,7 @@
 | ID | Paso | Situación | Resultado |
 |----|------|-----------|-----------|
 | **FA-01** | 5 | El administrador cambia la forma de pago propuesta. | Se registra la forma de pago elegida; la preferida del dueño no cambia. |
-| **FA-02** | 3 o 5 | El administrador cancela. | No se crea la cobertura ni el pago. Si el caso venía incluido desde CU-13, lo que ocurre con la mascota lo define CU-13. |
+| **FA-02** | 3 o 5 | El administrador cancela. | No se crea la cobertura ni el pago. Si el caso venía incluido desde CU-13 o CU-51, lo que ocurre con la mascota lo define ese caso. |
 
 ## Excepciones
 
@@ -38,7 +38,8 @@ En todas las excepciones **no se crea la cobertura ni el pago**, y el sistema in
 
 | ID | Paso | Situación | Mensaje |
 |----|------|-----------|---------|
-| **EX-01** | 6 | La mascota ya tiene una cobertura vigente (*Al día* o *Suspendida*). | *"{mascota} ya tiene una cobertura vigente."* |
+| **EX-01** | 6 | La mascota ya tiene una cobertura vigente *Al día*. | *"{mascota} ya tiene una cobertura al día con el plan {plan}. Para pasarla a otro plan, usá Cambiar plan."* |
+| **EX-07** | 6 | La mascota ya tiene una cobertura vigente *Suspendida por falta de pago*. | *"{mascota} tiene una cobertura suspendida por falta de pago. Para asignarle otro plan, primero regularizá la deuda."* |
 | **EX-02** | 6 | La mascota tiene deuda congelada de una cobertura anterior. | *"{mascota} tiene deuda pendiente de una cobertura anterior. Registrá esos pagos antes de asignar un plan."* |
 | **EX-03** | 6 | El dueño tiene deuda de otra de sus mascotas. | *"{dueño} tiene deuda pendiente de {otra mascota}. No se puede asignar un plan hasta saldarla."* |
 | **EX-04** | 6 | El plan elegido se desactivó entre que se mostró la lista y la confirmación. | *"El plan {plan} está inactivo y no se puede asignar."* |
@@ -113,8 +114,8 @@ Feature: CU-22 Asignar plan a una mascota
     Then "Luna" no tiene cobertura vigente
     And no se registra ningún pago
 
-  @EX-01 @D9
- Scenario Outline: No se puede asignar un plan a una mascota que ya tiene una cobertura sin dar de baja
+  @EX-01 @EX-07 @D9
+  Scenario Outline: No se puede asignar un plan a una mascota que ya tiene una cobertura sin dar de baja
     Given "Luna" tiene una cobertura "<estado>" con el plan "Plan Base"
     When el administrador intenta asignar el plan "Plan Plus" a "Luna"
     Then no se crea ninguna cobertura
@@ -123,7 +124,7 @@ Feature: CU-22 Asignar plan a una mascota
     Examples:
       | estado  | mensaje        |
       | Al día  | Luna ya tiene una cobertura al día con el plan Plan Base. Para pasarla a otro plan, usá Cambiar plan.|
-      | Suspendida por falta de pago | Luna tiene una cobertura suspendida por falta de pago. Para asignarle otro plan, primero regularizá la deuda |
+      | Suspendida por falta de pago | Luna tiene una cobertura suspendida por falta de pago. Para asignarle otro plan, primero regularizá la deuda. |
 
   @EX-02 @D28
   Scenario: Deuda congelada de la propia mascota
@@ -213,10 +214,11 @@ Feature: CU-22 Asignar plan a una mascota
 | D2, D3 | RN-05 |
 | D6 | RN-06 |
 | D7 | Paso 4, FA-01, RN-10 |
-| D9, D10 | RN-01, RN-07, EX-01 |
+| D9, D10 | RN-01, RN-07, EX-01, EX-07 |
 | D21 | RN-04, EX-04 |
 | D28 | RN-02, EX-02 |
 | D29, D38, D55 | RN-03, EX-03 |
 | D56, D58 | RN-06 |
 | D57 | RN-09, EX-05 |
 | D59 | RN-10 |
+| D107 | Relaciones (incluido por CU-51) |

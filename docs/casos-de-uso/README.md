@@ -21,6 +21,7 @@ y de las decisiones de diseño de [decisiones.md](../decisiones.md).
   10. Trazabilidad (requisito o decisión → paso, regla o escenario que lo cubre)
 - **Gherkin:** palabras clave en **inglés** (`Feature`, `Background`, `Scenario`, `Scenario Outline`, `Given`, `When`, `Then`, `Examples`) y texto de los pasos en **español**. Cada flujo alternativo, excepción y regla relevante tiene al menos un escenario; los casos límite se escriben como `Scenario Outline` con `Examples`.
 - **Etiquetas:** el `Feature` lleva el ID del caso (`@CU-39`) y cada escenario lleva el flujo que prueba (`@FA-01`, `@EX-04`, `@RN-02`) más los requisitos y decisiones que cubre (`@RF-PRE-04 @D17`).
+- **Supuestos durante la revisión:** mientras una tanda está en revisión, cada caso puede tener una sección *Supuestos a confirmar* (`S-NN`) antes de los escenarios. Cuando se confirman, pasan a `decisiones.md` como `Dn` y la sección se quita.
 - **Mismo nivel de detalle** para todos los casos. El caso de referencia es [CU-39 Registrar consumo](CU-39-registrar-consumo.md).
 - **Diagrama:** diagrama UML de casos de uso en PlantUML, con una imagen SVG exportada.
 
@@ -50,6 +51,7 @@ y de las decisiones de diseño de [decisiones.md](../decisiones.md).
 | CU-13 | Dar de alta mascota (`«include»` CU-22) |
 | CU-14 | Editar mascota |
 | CU-15 | Dar de baja mascota |
+| CU-51 | Reactivar mascota (`«include»` CU-22) |
 | CU-16 | Crear plan |
 | CU-17 | Editar plan |
 | CU-18 | Desactivar plan |

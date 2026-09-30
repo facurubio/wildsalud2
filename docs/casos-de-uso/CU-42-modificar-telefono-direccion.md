@@ -9,7 +9,7 @@
 
 ## Precondiciones
 
-1. El dueño inició sesión y su cuenta está **Activa** (CU-02).
+1. El dueño inició sesión y su cuenta está en estado **Activo** (CU-02).
 
 ## Flujo principal
 
@@ -72,7 +72,7 @@ Feature: CU-42 Modificar teléfono y dirección
 
   Background:
     Given la fecha y hora actual es "20/10/2026 10:00"
-    And la dueña "Carla Gómez" tiene la cuenta "Activa" e inició sesión
+    And la dueña "Carla Gómez" tiene la cuenta en estado "Activo" e inició sesión
     And sus datos son teléfono "11 5555-1234" y dirección "Av. Corrientes 1234, CABA, Buenos Aires, 1043"
 
   @flujo-principal @RF-DUE-02 @RN-03

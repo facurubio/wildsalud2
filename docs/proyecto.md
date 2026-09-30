@@ -145,7 +145,7 @@ La aplicación tiene como principal usuario al administrador, quien se encarga d
    - edad aproximada
   > **Precisado por [D41](decisiones.md#mascota):** la edad aproximada se guarda en años, tal como se cargó.
 - **RF-MAS-02** — Asociar cada mascota a un único dueño (relación 1 dueño → N mascotas).
-  > **Precisado por [D42](decisiones.md#mascota):** la transferencia de una mascota a otro dueño está fuera de alcance: se da de baja y se da de alta con el nuevo dueño.
+  > **Precisado por [D119](decisiones.md#mascotas-ficha-alta-baja-y-reactivación):** el administrador puede cambiar el dueño asignado a una mascota editándola; la mascota sigue teniendo un único dueño.
 - **RF-MAS-03** — Asignar el plan de cobertura por mascota, no por dueño (dos mascotas del mismo dueño pueden tener planes distintos).
 - **RF-MAS-04** — Identificar a cada dueño con su dni y a su mascota con un número de afiliado, usable como criterio de búsqueda rápida.
   > **Precisado por [D23](decisiones.md#mascota), [D45](decisiones.md#usuarios-y-acceso):** el número de afiliado lo genera el sistema, es único, nunca se reutiliza y se conserva entre coberturas; el DNI del dueño es único y no hay número de socio visible.

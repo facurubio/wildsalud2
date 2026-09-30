@@ -3,10 +3,10 @@
 Registro de las decisiones tomadas para resolver ambigüedades del documento de requisitos
 ([proyecto.md](proyecto.md)) antes de escribir los casos de uso detallados y el modelo de datos.
 
-Los números (D1…D46) son identificadores estables en el orden en que se tomaron las decisiones;
-las secciones las agrupan por tema.
+Los números (D1, D2, …) son identificadores estables en el orden en que se tomaron las decisiones;
+las secciones las agrupan por tema. Un número que no aparece corresponde a una decisión descartada.
 
-> Estado: sesión de definición cerrada (46 decisiones), pendiente de confirmación final.
+> Estado: vigente. Se agregan decisiones a medida que se confirman los supuestos de cada tanda de casos de uso.
 
 ## Período y pagos
 
@@ -41,6 +41,7 @@ las secciones las agrupan por tema.
 | D38 | Qué cuenta como deuda            | **Cualquier** período impago y vencido: tanto de una cobertura suspendida como la deuda congelada de una cobertura dada de baja.                                                                                 |
 | D55 | Deuda del dueño y asignación de planes | Si el dueño tiene deuda de cualquiera de sus mascotas, **no se puede asignar un plan a ninguna** de sus mascotas: ni al dar de alta una mascota nueva ni al volver a asignar un plan a una que ya existía. |
 | D64 | Deuda congelada de mascota o dueño dados de baja | La deuda congelada **se puede pagar aunque la mascota o el dueño estén dados de baja**. Es la única forma de que el dueño deje de estar bloqueado por esa deuda. |
+| D113 | Baja inmediata y mes en curso | La baja de un dueño o de una mascota es inmediata, aunque el mes esté pago, y **no hay reintegro**. Si ocurre entre el día 1 y el 13 con el mes impago, ese mes **no genera deuda**, aunque haya habido consumos (se mantiene D27). |
 | D67 | Pagos parciales y plazo de baja | Pagar una parte de la deuda **no reinicia ni extiende** el plazo de 3 meses para la baja por deuda: se sigue contando desde la misma fecha de suspensión. |
 
 ## Estado de la cobertura
@@ -92,7 +93,7 @@ las secciones las agrupan por tema.
 | D23 | Número de afiliado       | Lo **genera el sistema** al dar de alta la mascota; es único, nunca se reutiliza y la mascota lo **conserva** aunque tenga una cobertura nueva.       |
 | D33 | Ficha de la mascota      | La ficha completa (datos de salud, identificatorios y administrativos) la **crea y modifica solo el administrador**. El veterinario solo la consulta. |
 | D41 | Edad de la mascota       | Se guarda la **edad aproximada en años** tal como se cargó.                                                                                           |
-| D42 | Transferencia de mascota | **Fuera de alcance**: se da de baja con el dueño actual y se da de alta con el nuevo (nuevo número de afiliado, antigüedad 0).                        |
+| D42 | Transferencia de mascota | ~~Fuera de alcance~~. **Reemplazada por D119**: el cambio de dueño se hace editando la mascota. |
 
 ## Usuarios y acceso
 
@@ -124,6 +125,7 @@ las secciones las agrupan por tema.
 | D48 | Pagos en línea | **MercadoPago queda fuera de alcance**: los pagos son manuales. El diseño queda preparado para integrarlo después sin tocar el núcleo. |
 | D51 | Unidad de consumo | Cada consumo registrado **descuenta una unidad** de la prestación. No hay campo de cantidad. |
 | D52 | Historia clínica | La **historia clínica queda fuera de alcance**: el consumo no lleva observaciones ni texto libre del veterinario. |
+| D108 | Derecho de supresión (Ley 25.326) | **Fuera de alcance**: el sistema solo hace borrado lógico y no contempla el pedido de borrado definitivo de datos personales. |
 
 ## Consultas del veterinario
 
@@ -145,3 +147,67 @@ las secciones las agrupan por tema.
 | D77 | Alertas en la aplicación | Se **calculan en el momento** según la situación de cada mascota y desaparecen solas cuando esa situación termina. No se guardan ni se marcan como leídas. |
 | D78 | Alerta de vencimiento próximo | Se muestra **del día 11 al 13** inclusive, con la cuota del mes impaga (igual que el email de 48 hs antes). |
 | D79 | Consumos que ve el dueño | El dueño ve **solo los consumos del período en curso** de cada prestación. No ve consumos de períodos anteriores ni de coberturas anteriores. |
+
+## Personas: datos, altas, bajas y reactivaciones
+
+| # | Tema | Decisión |
+|---|------|----------|
+| D80 | Datos obligatorios de personas | Todos los datos de RF-VET-01 y RF-DUE-01 son obligatorios, salvo piso y departamento. DNI de 7 u 8 dígitos, guardado sin puntos. Email con formato válido, guardado en minúsculas. Teléfono según D75. |
+| D81 | Email único | El email es **único dentro de cada rol**, incluidos los dados de baja, sin distinguir mayúsculas. Puede repetirse entre un veterinario y un dueño. |
+| D82 | Alta con DNI de alguien dado de baja | Se **rechaza** y el mensaje indica **reactivarlo**; no se crea otro registro. |
+| D83 | Edición por el administrador | El administrador edita **todos los datos**, incluidos DNI y email. A alguien *Inactivo* no se lo edita: primero se lo reactiva. |
+| D84 | Cambio de email | No cambia la cuenta de Google/Apple vinculada. Si la persona está *Invitado*, la invitación anterior queda sin efecto y se envía una nueva al email nuevo. |
+| D85 | Auditoría de ediciones | **Toda edición** que hace el administrador sobre datos de veterinarios, dueños y fichas de mascotas queda auditada con valor anterior y valor nuevo. Amplía D76. |
+| D86 | Listas de gestión | Las listas de veterinarios, dueños y mascotas (con búsqueda y filtros) son navegación dentro de los casos de uso, no casos aparte. |
+| D96 | Baja de alguien *Invitado* | Se puede dar de baja a un veterinario o dueño que todavía está *Invitado*; su invitación queda sin efecto. |
+| D97 | Reactivación de una cuenta | Al reactivar a un veterinario o dueño, la cuenta **vuelve a *Invitado***: se descarta la vinculación anterior y se le envía una **invitación nueva** para vincular otra vez su cuenta de Google/Apple (no hay contraseña propia, D24). Mientras está dado de baja, su cuenta de Google/Apple sigue reservada y no se puede vincular a otro usuario. |
+| D98 | Motivo de baja de personas | La baja de un veterinario y la de un dueño exigen un **motivo en texto libre obligatorio**. |
+| D99 | Emails por baja y reactivación | La **reactivación** envía la invitación de D97. La **baja no** envía ningún email. |
+| D100 | Baja de dueño en cascada | Se cancelan los cambios pendientes. Cada cobertura queda con motivo *por baja de la mascota* y cada mascota con motivo *por baja del dueño*. |
+
+## Cuentas, invitaciones y sesión
+
+| # | Tema | Decisión |
+|---|------|----------|
+| D87 | Vencimiento de la invitación | El enlace de invitación **vence a las 24 horas** y solo sirve el último generado: al generar una invitación nueva para un usuario (reenvío, cambio de email o reactivación), las anteriores sin usar pasan a *Vencida*, aunque falle el envío de la nueva. Si el envío falla, el administrador la reenvía (CU-12). |
+| D88 | Cuenta de proveedor no vinculada | Si alguien entra con una cuenta de Google/Apple que no está vinculada a ningún usuario, se lo rechaza aunque su email coincida con el de un usuario, sin revelar si ese email existe. |
+| D89 | Cuenta de proveedor ya vinculada | Si una invitación se usa con una cuenta de Google/Apple ya vinculada a otro usuario (activo o dado de baja), se rechaza y la invitación sigue en estado *Invitado*. |
+| D90 | Vencimiento de la sesión | La sesión vence a las **4 horas sin actividad**, igual para todos los roles. |
+| D91 | Reenvío a un usuario *Activo* | No lo desvincula hasta que use el enlace nuevo; en ese momento la cuenta nueva reemplaza a la anterior y se cierran sus sesiones abiertas. |
+| D92 | Usuario *Inactivo* | No puede iniciar sesión, no puede usar una invitación pendiente y no se le puede reenviar una: primero hay que reactivarlo. |
+| D93 | Invitación con otra sesión abierta | Si se abre una invitación con la sesión de otro usuario abierta en el navegador, el sistema lo avisa y cierra esa sesión antes de seguir. |
+| D94 | Auditoría de acceso | Quedan auditados los inicios y cierres de sesión, las vinculaciones de cuenta y los reenvíos de invitación. Los intentos rechazados no. |
+| D95 | Cerrar sesión | Cierra solo la sesión de WildSalud y solo en ese dispositivo; no cierra la sesión de Google/Apple ni otras sesiones. |
+| D112 | Administradores cargados por configuración | La configuración inicial crea al administrador en estado *Invitado* y le envía la invitación; la vincula con CU-01. Si pierde su cuenta de Google/Apple, se resuelve por configuración (no con CU-12). |
+| D111 | Estados de la invitación | Solo tres: ***Invitado*** (se envió y todavía no se usó), ***Vigente*** (el usuario la aceptó y vinculó su cuenta) y ***Vencida*** (pasaron 24 horas sin usarla, o dejó de servir porque se generó otra invitación para el mismo usuario o porque se dio de baja a la persona). |
+| D109 | Pantalla de inicio por rol | Dueño: CU-40 Consultar mis mascotas. Veterinario: CU-37 Buscar mascota. Administrador: CU-32 Ver panel global. |
+| D110 | Mensaje de permiso | Cuando un usuario intenta hacer o ver algo que no le corresponde, el mensaje es siempre *"No tenés permiso para hacer esta operación."* |
+
+## Mascotas: ficha, alta, baja y reactivación
+
+| # | Tema | Decisión |
+|---|------|----------|
+| D101 | Alta de mascota "todo o nada" | La mascota, su número de afiliado, la cobertura y el primer pago se crean en una sola operación. Si algo falla o se cancela, no queda nada registrado. |
+| D102 | Formato del número de afiliado | Seis dígitos correlativos con ceros a la izquierda (por ejemplo, `000125`), asignados al confirmar el alta. Nunca se repiten. |
+| D103 | Datos de la ficha | Obligatorios: nombre, especie (**texto libre**), sexo, castrado/a (admite *No se sabe*) y edad aproximada (entero de 0 a 30). El resto es opcional. |
+| D104 | Alta con dueño *Invitado* | Se puede dar de alta una mascota de un dueño que todavía está *Invitado*. Un dueño dado de baja no. |
+| D105 | Posible duplicado | Si el dueño ya tiene una mascota con el mismo nombre y especie, el sistema avisa pero no bloquea el alta. |
+| D106 | Motivo de baja de mascota | Obligatorio, de una lista fija: *Fallecimiento*, *Pedido del dueño* u *Otro* (con detalle). La baja en cascada usa *por baja del dueño* (D100). El cambio de dueño no es un motivo de baja (D119). |
+| D107 | Reactivar mascota | Se agrega el caso **CU-51 Reactivar mascota**: la mascota conserva su número de afiliado y su historial, e incluye CU-22 Asignar plan (cobertura nueva con primer pago). |
+| D114 | Foto de la mascota | Opcional, una sola. Se aceptan **JPG, PNG y HEIC de hasta 20 MB** (fotos de iPhone). El sistema la **reduce automáticamente** a un JPG de 1600 px en el lado mayor y guarda solo esa versión. |
+| D116 | Baja por fallecimiento | Una mascota dada de baja por *Fallecimiento* **no se puede reactivar**. Por eso, al elegir ese motivo, el sistema pide una **doble confirmación** antes de darla de baja. |
+| D117 | Motivo de reactivación de mascota | La reactivación de una mascota no pide motivo. |
+| D118 | Ficha al reactivar | Durante la reactivación la ficha se muestra solo para lectura; al terminar, el sistema ofrece editarla con CU-14. |
+| D119 | Cambio de dueño | No se da de baja una mascota por cambio de dueño: el administrador **cambia el dueño asignado** editando la mascota (CU-14). Reemplaza a D42. |
+| D120 | Aviso de duplicado ampliado | El aviso de posible duplicado del alta también revisa las mascotas **dadas de baja** del dueño y sugiere reactivarlas con CU-51, salvo que la baja haya sido por *Fallecimiento*. No bloquea el alta. |
+| D121 | Pagos y dueño | Los pagos **no guardan el dueño**: pertenecen a la mascota. Los pagos agrupados por dueño (CU-35) se agrupan por el dueño **actual** de cada mascota. |
+| D122 | Qué se conserva al cambiar de dueño | La mascota conserva **todo**: número de afiliado, cobertura con su plan, estado y antigüedad, cambio pendiente, pagos y consumos. |
+| D123 | Cambio de dueño con deuda | Si la mascota tiene deuda, **no se puede cambiar de dueño** hasta saldarla. |
+| D124 | Dueño nuevo | Tiene que estar *Invitado* o *Activo*, ser distinto del actual y **no tener deuda** de otras mascotas (D55). |
+| D125 | Visibilidad tras el cambio de dueño | El dueño anterior **deja de ver** la mascota; el nuevo la ve como propia (con D79). |
+
+## Consultas del dueño: mascotas dadas de baja
+
+| # | Tema | Decisión |
+|---|------|----------|
+| D115 | Deuda de mascotas dadas de baja | En "Mis mascotas" (CU-40) hay una sección **Mascotas dadas de baja** con cada una y su deuda pendiente, si tiene. Además, mientras exista esa deuda, se muestra una **alerta** (CU-43) porque bloquea asignar planes a sus mascotas (D55). |

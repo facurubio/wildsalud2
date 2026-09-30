@@ -9,7 +9,7 @@
 
 ## Precondiciones
 
-1. El veterinario inició sesión y su cuenta está **Activa** (CU-02).
+1. El veterinario inició sesión y su cuenta está en estado **Activo** (CU-02).
 2. El veterinario eligió una mascota no dada de baja (CU-37).
 
 ## Flujo principal
@@ -66,7 +66,7 @@ Feature: CU-38 Consultar ficha y cobertura
 
   Background:
     Given la fecha y hora actual es "20/10/2026 10:00", salvo que el escenario indique otra
-    And el veterinario "Ana López" de la veterinaria "Patitas" tiene la cuenta "Activa" e inició sesión
+    And el veterinario "Ana López" de la veterinaria "Patitas" tiene la cuenta en estado "Activo" e inició sesión
     And existe el plan "Plan Base" con las prestaciones:
       | prestación  | límite | periodicidad | habilitada desde (períodos pagos) |
       | Consulta    | 2      | mensual      | 1                                 |

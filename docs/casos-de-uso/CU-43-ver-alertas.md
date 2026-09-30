@@ -9,12 +9,12 @@
 
 ## Precondiciones
 
-1. El dueño inició sesión y su cuenta está **Activa** (CU-02).
+1. El dueño inició sesión y su cuenta está en estado **Activo** (CU-02).
 
 ## Flujo principal
 
 1. El dueño ingresa a la aplicación.
-2. El sistema calcula las alertas de cada mascota no dada de baja del dueño según su situación en ese momento (**RN-01**).
+2. El sistema calcula las alertas de cada mascota no dada de baja del dueño, y de las dadas de baja que tengan deuda pendiente, según su situación en ese momento (**RN-01**).
 3. El sistema muestra las alertas ordenadas de la más grave a la menos grave (**RN-02**), cada una con la mascota a la que se refiere.
 
 ## Flujos alternativos
@@ -39,12 +39,13 @@
 
 | ID | Regla | Origen |
 |----|-------|--------|
-| **RN-01** | **Tipos de alerta y cuándo se muestran.** | RF-NOT-02, D25, D68 |
+| **RN-01** | **Tipos de alerta y cuándo se muestran.** | RF-NOT-02, D25, D68, D115 |
 | | 1. **Baja por deuda:** la cobertura se dio de baja por deuda y la mascota tiene deuda congelada. *"La cobertura de {mascota} se dio de baja por deuda. Cuotas adeudadas: {N}."* | D8, D27, D68 |
-| | 2. **Baja inminente:** la cobertura está suspendida y falta un mes o menos para el plazo de baja. *"La cobertura de {mascota} se dará de baja el {fecha} si no se regulariza el pago."* | D8, D25 |
-| | 3. **Suspensión:** la cobertura está suspendida por falta de pago. *"La cobertura de {mascota} está suspendida por falta de pago. Cuotas adeudadas: {N}."* | RF-PAG-04, D25 |
-| | 4. **Vencimiento próximo:** del día 11 al 13 inclusive, con la cuota del mes impaga. *"La cuota de {mes} de {mascota} vence el 13/{mes}."* | RF-NOT-01, RF-NOT-02, D78 |
-| | 5. **Prestación agotada:** una prestación de la cobertura vigente está agotada en el período en curso. *"Se agotó {prestación} de {mascota} para el período {período}."* | RF-PRE-03, RF-NOT-02 |
+| | 2. **Deuda de una mascota dada de baja:** la mascota está dada de baja y tiene deuda congelada. *"{mascota} está dada de baja y tiene cuotas adeudadas: {N}. Hasta saldarlas no se pueden asignar planes a tus mascotas."* | D27, D55, D115 |
+| | 3. **Baja inminente:** la cobertura está suspendida y falta un mes o menos para el plazo de baja. *"La cobertura de {mascota} se dará de baja el {fecha} si no se regulariza el pago."* | D8, D25 |
+| | 4. **Suspensión:** la cobertura está suspendida por falta de pago. *"La cobertura de {mascota} está suspendida por falta de pago. Cuotas adeudadas: {N}."* | RF-PAG-04, D25 |
+| | 5. **Vencimiento próximo:** del día 11 al 13 inclusive, con la cuota del mes impaga. *"La cuota de {mes} de {mascota} vence el 13/{mes}."* | RF-NOT-01, RF-NOT-02, D78 |
+| | 6. **Prestación agotada:** una prestación de la cobertura vigente está agotada en el período en curso. *"Se agotó {prestación} de {mascota} para el período {período}."* | RF-PRE-03, RF-NOT-02 |
 | **RN-02** | **Orden.** Se muestran en el orden de la lista anterior. Si para una misma mascota corresponden la de baja inminente y la de suspensión, se muestra solo la de baja inminente. | — |
 | **RN-03** | **Calculadas en el momento.** Las alertas se calculan con la situación de cada mascota en la fecha y hora de la consulta (hora de Argentina). No se guardan ni se marcan como leídas: desaparecen solas cuando la situación termina. | D53, D54, D77 |
 | **RN-04** | **Solo lo propio.** El dueño ve solo alertas de sus mascotas. | RNF-SEG-03 |
@@ -59,7 +60,7 @@ Feature: CU-43 Ver alertas
   Para actuar a tiempo y no quedarme sin cobertura
 
   Background:
-    Given la dueña "Carla Gómez" tiene la cuenta "Activa" e inició sesión
+    Given la dueña "Carla Gómez" tiene la cuenta en estado "Activo" e inició sesión
     And "Carla Gómez" tiene la mascota "Luna" con cobertura con el plan "Plan Base"
 
   @RN-01 @RF-NOT-01 @RF-NOT-02
@@ -94,6 +95,21 @@ Feature: CU-43 Ver alertas
       | momento          | alerta                                                                                    |
       | 13/09/2026 10:00 | La cobertura de Luna está suspendida por falta de pago. Cuotas adeudadas: 2.              |
       | 14/09/2026 00:00 | La cobertura de Luna se dará de baja el 14/10/2026 si no se regulariza el pago.           |
+
+  @RN-01 @D115
+  Scenario: Alerta de deuda de una mascota dada de baja
+    Given la fecha y hora actual es "20/10/2026 10:00"
+    And "Carla Gómez" tiene la mascota "Milo" dada de baja con 2 cuotas congeladas
+    When "Carla Gómez" ingresa a la aplicación
+    Then ve la alerta "Milo está dada de baja y tiene cuotas adeudadas: 2. Hasta saldarlas no se pueden asignar planes a tus mascotas."
+
+  @RN-01 @D115
+  Scenario: Una mascota dada de baja sin deuda no genera alertas
+    Given la fecha y hora actual es "20/10/2026 10:00"
+    And la cobertura de "Luna" está "Al día" con la cuota de octubre 2026 pagada y sin prestaciones agotadas
+    And "Carla Gómez" tiene la mascota "Milo" dada de baja sin deuda
+    When "Carla Gómez" ingresa a la aplicación
+    Then no ve la sección de alertas
 
   @RN-01 @D68
   Scenario: Alerta de baja por deuda
@@ -160,3 +176,4 @@ Feature: CU-43 Ver alertas
 | D8, D25, D27, D68 | RN-01 |
 | D53, D54, D77 | RN-03, FA-02 |
 | D78 | RN-01 (vencimiento próximo) |
+| D115, D55 | RN-01 (deuda de una mascota dada de baja) |
