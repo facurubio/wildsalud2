@@ -23,7 +23,6 @@ y de las decisiones de diseño de [decisiones.md](../decisiones.md).
 - **Etiquetas:** el `Feature` lleva el ID del caso (`@CU-39`) y cada escenario lleva el flujo que prueba (`@FA-01`, `@EX-04`, `@RN-02`) más los requisitos y decisiones que cubre (`@RF-PRE-04 @D17`).
 - **Supuestos durante la revisión:** mientras una tanda está en revisión, cada caso puede tener una sección *Supuestos a confirmar* (`S-NN`) antes de los escenarios. Cuando se confirman, pasan a `decisiones.md` como `Dn` y la sección se quita.
 - **Mismo nivel de detalle** para todos los casos. El caso de referencia es [CU-39 Registrar consumo](CU-39-registrar-consumo.md).
-- **Diagrama:** diagrama UML de casos de uso en PlantUML, con una imagen SVG exportada.
 
 ## Lista de casos de uso
 

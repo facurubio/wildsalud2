@@ -117,6 +117,7 @@ las secciones las agrupan por tema. Un número que no aparece corresponde a una 
 | D25 | Notificaciones adicionales | Además del aviso 48 hs antes del vencimiento (día 11), se avisa cuando la cobertura **se suspende** y un mes antes de la **baja automática**.                              |
 | D43 | Canal de notificaciones    | **Solo email** en una primera etapa, detrás de un mecanismo reemplazable para sumar WhatsApp sin tocar el núcleo. Se guarda canal y resultado (éxito/fallo) de cada envío. |
 | D68 | Aviso de baja por deuda | Además del aviso un mes antes (D25), se envía un **aviso al dueño el día en que la cobertura se da de baja por deuda**. |
+| D143 | Envío de avisos por email | Los avisos que salen de un proceso de medianoche se envían **a las 09:00** de ese día; el de una suspensión por anulación de un pago, en el momento. **Un email por mascota.** Si falla, se **reintenta hasta 3 veces en 24 horas** y después queda *Fallido*. Los envíos se consultan en el historial de auditoría (CU-36). |
 
 ## Alcance
 
