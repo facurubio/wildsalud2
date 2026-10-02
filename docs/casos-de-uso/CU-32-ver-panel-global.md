@@ -68,7 +68,7 @@ Feature: CU-32 Ver panel global
       | mascota | dueño       | cobertura                    | suspendida desde | cuota de octubre 2026 | períodos adeudados |
       | Luna    | Carla Gómez | Al día                       |                  | Pagada                |                    |
       | Toby    | Carla Gómez | Al día                       |                  | Impaga                |                    |
-      | Rocco   | Pedro Sosa  | Suspendida por falta de pago | 14/08/2026       | Impaga                | 2026-08, 2026-09   |
+      | Rocco   | Pedro Sosa  | Suspendida por falta de pago | 14/07/2026       | Impaga                | 2026-07 a 2026-09  |
       | Milo    | Laura Paz   | Suspendida por falta de pago | 14/09/2026       | Impaga                | 2026-09            |
 
   @flujo-principal @RN-02 @D109 @D142
@@ -76,13 +76,13 @@ Feature: CU-32 Ver panel global
     When el administrador inicia sesión
     Then la lista "Cuotas del mes por vencer" muestra a "Toby" con importe 10000 y vencimiento "13/10/2026"
     And la lista "Coberturas suspendidas" muestra a "Rocco" y a "Milo"
-    And la lista "Bajas por deuda en los próximos 30 días" muestra a "Rocco" con fecha de baja "14/11/2026"
+    And la lista "Bajas por deuda en los próximos 30 días" muestra a "Rocco" con fecha de baja "14/10/2026"
     And "Luna" no aparece en ninguna lista
 
   @RN-03 @D4 @D6
   Scenario: Las suspendidas muestran lo que hay que pagar para reactivarlas
     When el administrador ve el panel
-    Then "Rocco" figura en "Coberturas suspendidas" con 2 cuotas adeudadas e importe para reactivar 30000
+    Then "Rocco" figura en "Coberturas suspendidas" con 3 cuotas adeudadas e importe para reactivar 40000
     And "Milo" figura con 1 cuota adeudada e importe para reactivar 20000
 
   @RN-04 @D8
