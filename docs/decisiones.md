@@ -228,3 +228,13 @@ las secciones las agrupan por tema. Un número que no aparece corresponde a una 
 | D135 | Renombrar un tipo de prestación | El nombre corregido se ve **en todo el sistema**, incluidos los consumos y planes anteriores, porque es el mismo tipo. El nombre anterior queda en la auditoría. |
 | D136 | Eliminar un plan en uso | No se puede eliminar un plan mientras alguna mascota lo tenga en una cobertura vigente. |
 | D137 | Eliminar es definitivo | Un plan eliminado no se puede restaurar. |
+
+## Correcciones y consultas del administrador
+
+| # | Tema | Decisión |
+|---|------|----------|
+| D138 | Qué se corrige de un consumo | Solo la **prestación** y la **mascota**. La fecha y hora, el veterinario y la veterinaria son los del registro original. El consumo corregido tiene que cumplir las reglas de CU-39 en la fecha en que se registró. |
+| D139 | Anulación de consumo | Es **definitiva**: un consumo anulado no se vuelve a validar; si se anuló por error, el veterinario lo registra de nuevo. |
+| D140 | Búsqueda del administrador | Por los mismos datos que el veterinario (D69) más el **email del dueño**; filtros por estado de cobertura, deuda, plan y estado de la cuenta del dueño. Sin texto ni filtros lista todo. Puede incluir dados de baja. |
+| D141 | Auditoría | Se filtra por fechas, usuario, tipo de acción y entidad (50 registros por página). Los registros se **conservan siempre**, no se modifican y **no se exportan**. |
+| D142 | Panel global del administrador | Muestra **solo tres listas**: cuotas del mes por vencer (del 1 al 13, impagas), coberturas suspendidas por falta de pago y bajas por deuda en los próximos 30 días. Desde cada elemento se llega a registrar el pago. |
