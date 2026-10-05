@@ -8,7 +8,12 @@ import { cerrarSesion } from "../ingresar/acciones";
 function itemsDelMenu(usuario: UsuarioActual): ItemMenu[] {
   const items: ItemMenu[] = [{ href: "/", texto: "Inicio" }];
   if (usuario.rol === "administrador") {
-    items.push({ href: "/planes", texto: "Planes" }, { href: "/catalogo", texto: "Catálogo de prestaciones" });
+    items.push(
+      { href: "/veterinarios", texto: "Veterinarios" },
+      { href: "/duenos", texto: "Dueños" },
+      { href: "/planes", texto: "Planes" },
+      { href: "/catalogo", texto: "Catálogo de prestaciones" },
+    );
   }
   return items;
 }
