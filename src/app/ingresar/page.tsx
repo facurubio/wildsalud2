@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { mensajeIngreso } from "@/lib/auth/mensajes";
@@ -34,6 +35,12 @@ export default async function PaginaIngresar({ searchParams }: PageProps<"/ingre
             Continuar con Google
           </Button>
         </form>
+
+        <p className="text-center text-xs text-muted-foreground">
+          <Link href="/privacidad" className="underline">
+            Política de privacidad
+          </Link>
+        </p>
       </div>
     </main>
   );

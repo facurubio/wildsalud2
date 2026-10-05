@@ -9,7 +9,10 @@
 //   npm run configurar-administrador -- --nombre Ana --apellido Pérez --email ana@gmail.com \
 //     [--veterinaria "Veterinaria Centro"] [--url https://wildsalud.vercel.app]
 //
-// Usa la base de DATABASE_URL (.env.local). Para producción, pasá la URL de producción en el entorno.
+// `npm run configurar-administrador` usa la base de .env.local (dev).
+// `npm run configurar-administrador:produccion` usa .env.produccion (wildsalud-prod, datos reales):
+// ese archivo tiene solo DATABASE_URL con la cadena del Transaction pooler de producción y nunca se sube a GitHub.
+// En producción pasá también --url con la dirección de Vercel.
 
 import { parseArgs } from "node:util";
 import postgres from "postgres";

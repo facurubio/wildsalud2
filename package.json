@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "configurar-administrador": "tsx --env-file=.env.local scripts/configurar-administrador.mts"
+    "configurar-administrador": "tsx --env-file=.env.local scripts/configurar-administrador.mts",
+    "configurar-administrador:produccion": "tsx --env-file=.env.produccion scripts/configurar-administrador.mts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
