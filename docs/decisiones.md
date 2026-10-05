@@ -25,7 +25,7 @@ las secciones las agrupan por tema. Un número que no aparece corresponde a una 
 | D58 | Importe del pago | **No es editable**: lo calcula el sistema según el plan y el período (D6). |
 | D63 | Varios períodos en una operación | El administrador puede pagar **varios períodos en una sola operación**, siempre consecutivos y **empezando por el más antiguo**. Se registra un pago por período. |
 | D65 | Primer pago de una cobertura | El primer pago de una cobertura (el que se registra al asignar el plan) **no se puede anular ni corregir de ninguna manera**. |
-| D66 | Datos corregibles de un pago | Solo se corrigen **fecha de pago**, **forma de pago** y **mascota**. El período y el importe los calcula el sistema. |
+| D66 | Datos corregibles de un pago | Solo se corrigen **fecha de pago** y **forma de pago**; el pago nuevo es de la misma mascota, el mismo período y el mismo importe. La **mascota no se cambia**: un pago cargado a la mascota equivocada se anula (CU-28) y se registra en la correcta (CU-26). |
 | D59 | Formas de pago | **Lista fija**: Efectivo, Transferencia bancaria, Tarjeta de débito y Tarjeta de crédito. |
 
 ## Deuda y baja automática
