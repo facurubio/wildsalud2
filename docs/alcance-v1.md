@@ -33,7 +33,7 @@ Estas reglas valen solo para la v1 y se reemplazan cuando llegue el caso de uso 
 - **Administrador inicial.** La cuenta del administrador, con sus datos de veterinario, se carga por configuración (D50, D145), antes de la entrega.
 - **Edición de planes solo sin mascotas.** Un plan se puede editar libremente mientras ninguna mascota lo tenga. Cuando una mascota ya lo tiene, queda bloqueado hasta que llegue CU-17 Editar plan. Si hace falta otro precio o condiciones, se crea un plan nuevo.
 - **Suspensión calculada, sin proceso ni aviso.** El estado *Suspendida por falta de pago* se calcula en el momento de cada consulta (D54): desde el día 14 sin pago del mes, el veterinario la ve suspendida y no puede registrar consumos; al pagar la deuda (CU-26) vuelve a estar *Al día*. El proceso programado de CU-44 y el aviso de CU-48 no entran.
-- **Infraestructura sin costo.** Next.js (TypeScript), Supabase Free y Vercel Hobby, sin ninguna tarjeta cargada. Hay una base de prueba para el desarrollo y otra real; el desarrollo nunca toca la real.
+- **Infraestructura sin costo.** Next.js (TypeScript), Supabase Free y Vercel Hobby, sin ninguna tarjeta cargada (el porqué está en [stack.md](stack.md)). Hay una base de prueba para el desarrollo y otra real; el desarrollo nunca toca la real.
 
 ### Riesgos aceptados
 
