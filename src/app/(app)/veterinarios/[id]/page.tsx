@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { Aviso } from "@/components/aviso";
 import { Encabezado } from "@/components/encabezado";
+import { Campo, Formulario } from "@/components/formulario";
 import { EtiquetaEstado } from "@/components/etiqueta-estado";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { formatearFechaHora } from "@/lib/formato";
 import { esUuid } from "@/lib/operacion";
 import { usuarioDePagina } from "@/lib/pagina";
 import { obtenerVeterinario, type VeterinarioDetalle } from "@/lib/personas/consultas";
 import { nombreCompleto } from "@/lib/personas/validacion";
 import { ahora } from "@/lib/tiempo";
-import { generarEnlaceVeterinario } from "../acciones";
+import { bajaVeterinario, generarEnlaceVeterinario } from "../acciones";
 import { FormularioConEnlace } from "../formulario-con-enlace";
 
 function Dato({ etiqueta, children }: { etiqueta: string; children: React.ReactNode }) {
@@ -102,6 +104,31 @@ export default async function PaginaVeterinario({ params, searchParams }: PagePr
               anteriores dejan de servir.
             </p>
             <FormularioConEnlace accion={generarEnlaceVeterinario.bind(null, veterinario.id)} textoBoton="Generar enlace nuevo" />
+          </CardContent>
+        </Card>
+      )}
+
+      {!dadoDeBaja && (
+        <Card>
+          <CardContent>
+            <details>
+              <summary
+                className={`${buttonVariants({ variant: "destructive" })} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}
+              >
+                Dar de baja
+              </summary>
+              <div className="mt-4 space-y-4">
+                <Aviso tipo="info">
+                  Con la baja, {nombre} no va a poder ingresar ni registrar consumos. Se conservan sus datos y los
+                  consumos que registró.
+                </Aviso>
+                <Formulario accion={bajaVeterinario.bind(null, veterinario.id)} textoBoton="Confirmar la baja">
+                  <Campo etiqueta="Motivo de la baja" htmlFor="motivo">
+                    <Textarea id="motivo" name="motivo" rows={3} />
+                  </Campo>
+                </Formulario>
+              </div>
+            </details>
           </CardContent>
         </Card>
       )}

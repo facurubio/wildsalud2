@@ -12,6 +12,7 @@ import {
   ErrorDeNegocio,
   esUuid,
   requerirUsuario,
+  type ResultadoAccion,
 } from "@/lib/operacion";
 import { bloquearPersonas, buscarPorDni, buscarPorEmail, obtenerVeterinario } from "@/lib/personas/consultas";
 import { origenDelPedido } from "@/lib/personas/origen";
@@ -21,8 +22,10 @@ import {
   datosDeVeterinario,
   describirVeterinario,
   huellaDeDatos,
+  leerMotivoBaja,
   mensajeDniRepetido,
   mensajeEmailRepetido,
+  MENSAJE_MOTIVO_BAJA,
   MENSAJE_SIN_CAMBIOS,
   nombreCompleto,
   validarVeterinario,
@@ -205,6 +208,70 @@ export async function editarVeterinario(
       mensaje: `${resultado.mensaje} Como cambió el email, generamos una invitación nueva: enviale el enlace por WhatsApp. El enlace anterior dejó de servir.`,
       enlace,
     };
+  }
+  return resultado;
+}
+
+// CU-06 Dar de baja veterinario: baja lógica, sin borrar nada (RN-02).
+export async function bajaVeterinario(
+  idFormulario: string,
+  _anterior: ResultadoAccion,
+  formData: FormData,
+): Promise<ResultadoAccion> {
+  let baja = false;
+
+  const resultado = await accion(async () => {
+    const usuario = await requerirUsuario("administrador"); // EX-04
+    if (!esUuid(idFormulario)) throw new ErrorDeNegocio(NO_DISPONIBLE);
+
+    // EX-02: la misma confirmación dos veces registra una sola baja.
+    const dado = await ejecutarUnaVez(
+      { clave: claveDeSolicitud(formData), usuarioId: usuario.id, operacion: "baja_veterinario" },
+      async (tx) => {
+        await bloquearPersonas(tx, "veterinario");
+        const actual = await obtenerVeterinario(idFormulario, tx, true); // bloquea: dos bajas simultáneas registran una sola
+        if (!actual) throw new ErrorDeNegocio(NO_DISPONIBLE);
+        const nombre = nombreCompleto(actual);
+
+        // RN-01 y EX-01: solo se da de baja a quien está Invitado o Activo.
+        if (actual.estadoCuenta === "inactivo") throw new ErrorDeNegocio(`La cuenta de ${nombre} ya está inactiva.`);
+        // EX-03 / RN-08: el motivo es obligatorio.
+        const motivo = leerMotivoBaja(campo(formData, "motivo"));
+        if (!motivo) throw new ErrorDeNegocio(MENSAJE_MOTIVO_BAJA);
+
+        const momento = ahora();
+        await tx`
+          update public.usuario
+          set estado_cuenta = 'inactivo', motivo_baja = ${motivo}, baja_en = ${momento}, baja_por = ${usuario.id}
+          where id = ${actual.id}
+        `;
+        // FA-01 / RN-03: la invitación sin usar deja de servir. La vinculación queda abierta: la cuenta de Google
+        // queda reservada (D97).
+        await tx`update public.invitacion set estado = 'vencida' where usuario_id = ${actual.id} and estado = 'invitado'`;
+        // RN-04: las sesiones abiertas se cierran. Además, el estado se valida en cada acción.
+        await tx`
+          update public.sesion set cerrada_en = ${momento}, motivo_cierre = 'baja'
+          where usuario_id = ${actual.id} and cerrada_en is null
+        `;
+        await auditar(tx, {
+          usuarioId: usuario.id,
+          accion: "baja",
+          entidad: "usuario",
+          entidadId: actual.id,
+          motivo,
+          detalle: { rol: "veterinario", estadoAnterior: actual.estadoCuenta, estadoNuevo: "inactivo" },
+        });
+        return { nombre };
+      },
+    );
+    baja = true;
+    return `Se dio de baja a ${dado.nombre}. Su cuenta quedó inactiva.`;
+  });
+
+  if (resultado?.ok && baja) {
+    revalidatePath("/veterinarios");
+    revalidatePath(`/veterinarios/${idFormulario}`);
+    redirect(`/veterinarios/${idFormulario}?aviso=baja`);
   }
   return resultado;
 }
