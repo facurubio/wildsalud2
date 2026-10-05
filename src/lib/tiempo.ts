@@ -39,3 +39,9 @@ export function periodoMensual(momento: Date = ahora()): string {
 export function periodoAnual(momento: Date = ahora()): string {
   return `${fechaArgentina(momento).anio}-01-01`;
 }
+
+// Fecha de hoy en hora de Argentina, AAAA-MM-DD.
+export function fechaHoy(momento: Date = ahora()): string {
+  const { anio, mes, dia } = fechaArgentina(momento);
+  return `${anio}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+}

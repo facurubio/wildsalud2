@@ -3,6 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Renueva la sesión de Supabase Auth en cada pedido, antes de mostrar la página.
 export async function proxy(request: NextRequest) {
+  // Si el ingreso falla en Supabase (por ejemplo, se demoró demasiado en Google), Supabase vuelve a la
+  // dirección principal con el error: se muestra el mensaje de CU-02 EX-03 en la pantalla de ingreso.
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === "/" && searchParams.has("error_code")) {
+    return NextResponse.redirect(new URL("/ingresar?error=validacion", request.url));
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

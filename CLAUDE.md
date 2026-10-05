@@ -30,6 +30,17 @@ Leelos antes de implementar un caso de uso. Si el código y los documentos no co
 - **Nada se borra físicamente**: las bajas y anulaciones cambian un estado.
 - **Reglas de negocio** en funciones puras de TypeScript, con pruebas en `*.test.ts` al lado.
 
+## Receta para un caso de uso
+
+El ejemplo a copiar es **planes** (CU-16) y el **catálogo** (CU-20).
+
+1. Leé el caso completo (flujo, excepciones con su mensaje exacto, reglas y escenarios).
+2. Reglas y validaciones en funciones puras en `src/lib/<área>/` con pruebas que salen de los escenarios (ej. `src/lib/planes/validacion.ts`). Lo que depende del estado de la cobertura usa `src/lib/cobertura/calculo.ts`.
+3. Consultas a la base en `src/lib/<área>/consultas.ts`.
+4. La operación es una server action en `src/app/(app)/<ruta>/acciones.ts`: `accion(...)` → `requerirUsuario(rol)` → `ejecutarUnaVez(...)` (transacción + protección contra doble clic) con `auditar(...)` adentro. Los errores del caso se lanzan con `ErrorDeNegocio(mensaje exacto)`.
+5. La pantalla en `src/app/(app)/<ruta>/page.tsx`: empieza con `usuarioDePagina(rol)`; formularios con `Formulario`, `Campo` y `Seleccion` de `src/components/formulario.tsx`; mensajes con `Aviso`; título con `Encabezado`. Agregá la opción del menú en `itemsDelMenu` (`src/app/(app)/layout.tsx`).
+6. Probá en computadora y en celular, corré `npm test`, `npm run typecheck`, `npm run lint` y `npm run build`, y hacé un commit por caso.
+
 ## Base de datos: dev y producción
 
 - Proyectos de Supabase: `wildsalud-dev` (ref `lgzkfyqcjnhwagletxds`) y `wildsalud-prod` (ref `bfbeblaiuwubznntxumy`).
