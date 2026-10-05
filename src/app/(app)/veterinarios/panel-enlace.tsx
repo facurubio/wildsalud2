@@ -63,7 +63,7 @@ export function PanelEnlace({
         )}
       </div>
       <p className="text-sm text-muted-foreground">
-        Mandáselo por WhatsApp. El enlace se usa una sola vez y vence el {formatearFechaHora(new Date(enlace.venceEn))}.
+        Mandáselo por WhatsApp. El enlace se usa una sola vez y vence el {formatearFechaHora(new Date(enlace.venceEn))} (24 horas).
         Por seguridad no lo volvemos a mostrar: si se pierde o vence, generá uno nuevo desde la ficha.
       </p>
       {volver && (

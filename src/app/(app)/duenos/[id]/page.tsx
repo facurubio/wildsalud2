@@ -3,7 +3,13 @@ import { Aviso } from "@/components/aviso";
 import { Encabezado } from "@/components/encabezado";
 import { EtiquetaEstado } from "@/components/etiqueta-estado";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { EstadoCoberturaBadge } from "@/components/mascota/cobertura";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { resumenCobertura } from "@/lib/cobertura/consultas";
+import { db } from "@/lib/db";
+import { formatearAfiliado } from "@/lib/mascotas/validacion";
+import { ahora } from "@/lib/tiempo";
 import { formatearFechaHora } from "@/lib/formato";
 import { esUuid } from "@/lib/operacion";
 import { usuarioDePagina } from "@/lib/pagina";
@@ -32,6 +38,17 @@ export default async function PaginaDueno({ params, searchParams }: PageProps<"/
   const confirmacion =
     aviso === "creado" ? `Se dio de alta a ${nombre}.` : aviso === "editado" ? `Se actualizaron los datos de ${nombre}.` : null;
   const dadoDeBaja = dueno.estadoCuenta === "inactivo";
+
+  // Mascotas del dueño con el estado de su cobertura, calculado en el momento (D54).
+  const momento = ahora();
+  const filas = await db()<{ id: string; numero_afiliado: number; nombre: string; especie: string; estado: string }[]>`
+    select id, numero_afiliado, nombre, especie, estado from public.mascota
+    where dueno_id = ${dueno.id}
+    order by estado, public.normalizar(nombre)
+  `;
+  const mascotas = await Promise.all(
+    filas.map(async (m) => ({ ...m, resumen: await resumenCobertura(db(), m.id, momento) })),
+  );
 
   return (
     <div className="space-y-6">
@@ -66,6 +83,48 @@ export default async function PaginaDueno({ params, searchParams }: PageProps<"/
               </>
             )}
           </dl>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
+          <CardTitle>Mascotas</CardTitle>
+          {!dadoDeBaja && (
+            <Link href={`/mascotas/nueva?dueno=${dueno.id}`} className={buttonVariants({ size: "sm" })}>
+              Dar de alta mascota
+            </Link>
+          )}
+        </CardHeader>
+        <CardContent>
+          {mascotas.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Todavía no tiene mascotas.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Mascota</TableHead>
+                  <TableHead className="hidden sm:table-cell">Afiliado</TableHead>
+                  <TableHead>Cobertura</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mascotas.map((m) => (
+                  <TableRow key={m.id}>
+                    <TableCell className="font-medium">
+                      <Link href={`/mascotas/${m.id}`} className="underline-offset-4 hover:underline">
+                        {m.nombre}
+                      </Link>{" "}
+                      <span className="text-muted-foreground">({m.especie})</span>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">{formatearAfiliado(m.numero_afiliado)}</TableCell>
+                    <TableCell>
+                      {m.estado === "dada_de_baja" ? "Dada de baja" : <EstadoCoberturaBadge estado={m.resumen?.estado ?? null} />}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 

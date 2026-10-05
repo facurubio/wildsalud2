@@ -110,7 +110,14 @@ export default async function PaginaMascota({ params, searchParams }: PageProps<
           <CardContent>
             {dueno && (
               <dl className="grid grid-cols-2 gap-3">
-                <Dato etiqueta="Nombre" valor={`${dueno.nombre} ${dueno.apellido}`} />
+                <Dato
+                  etiqueta="Nombre"
+                  valor={
+                    <Link href={`/duenos/${dueno.id}`} className="underline-offset-4 hover:underline">
+                      {dueno.nombre} {dueno.apellido}
+                    </Link>
+                  }
+                />
                 <Dato etiqueta="DNI" valor={dueno.dni} />
                 <Dato etiqueta="Teléfono" valor={dueno.telefono} />
                 <Dato etiqueta="Forma de pago preferida" valor={formasDePago[dueno.formaPagoPreferida]} />
