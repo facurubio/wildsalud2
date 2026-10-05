@@ -10,6 +10,7 @@ function itemsDelMenu(usuario: UsuarioActual): ItemMenu[] {
   if (usuario.rol === "administrador") {
     items.push(
       { href: "/veterinarios", texto: "Veterinarios" },
+      { href: "/duenos", texto: "Dueños" },
       { href: "/planes", texto: "Planes" },
       { href: "/catalogo", texto: "Catálogo de prestaciones" },
     );
