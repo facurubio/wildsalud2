@@ -17,7 +17,7 @@ Leelos antes de implementar un caso de uso. Si el código y los documentos no co
 
 - Next.js 16 (App Router, TypeScript) con Tailwind y shadcn/ui. Diseño **responsive**: todo se usa desde computadora y desde celular.
 - Supabase: base PostgreSQL y Supabase Auth (solo Google en la v1).
-- Publicación en Vercel (plan Hobby). No uses funciones exclusivas de Vercel (cron, KV, Blob, Edge Config): la app tiene que poder mudarse.
+- Publicación en Vercel (plan Hobby), proyecto `wildsalud`, región `gru1` (São Paulo). Cada push a `main` publica en producción (base `wildsalud-prod`); las versiones de prueba usan `wildsalud-dev`. No uses funciones exclusivas de Vercel (cron, KV, Blob, Edge Config): la app tiene que poder mudarse.
 
 ## Cómo está armado
 
