@@ -6,7 +6,8 @@ import { cerrarSesion } from "../ingresar/acciones";
 
 // Opciones del menú según el rol (CU-02 RN-10). Cada bloque agrega las suyas acá.
 function itemsDelMenu(usuario: UsuarioActual): ItemMenu[] {
-  const items: ItemMenu[] = [{ href: "/", texto: "Inicio" }];
+  const items: ItemMenu[] = [];
+  if (usuario.rol === "administrador" || usuario.esVeterinario) items.push({ href: "/mascotas", texto: "Mascotas" });
   if (usuario.rol === "administrador") {
     items.push(
       { href: "/veterinarios", texto: "Veterinarios" },
@@ -40,7 +41,7 @@ export default async function LayoutApp({ children }: LayoutProps<"/">) {
   return (
     <div className="flex min-h-full flex-1 flex-col md:flex-row">
       <Navegacion items={itemsDelMenu(usuario)} pie={pie} />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
+      <main className="mx-auto min-w-0 max-w-5xl flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
     </div>
   );
 }

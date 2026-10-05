@@ -33,6 +33,8 @@ Estas reglas valen solo para la v1 y se reemplazan cuando llegue el caso de uso 
 - **Administrador inicial.** La cuenta del administrador, con sus datos de veterinario, se carga por configuración (D50, D145), antes de la entrega.
 - **Edición de planes solo sin mascotas.** Un plan se puede editar libremente mientras ninguna mascota lo tenga. Cuando una mascota ya lo tiene, queda bloqueado hasta que llegue CU-17 Editar plan. Si hace falta otro precio o condiciones, se crea un plan nuevo.
 - **Suspensión calculada, sin proceso ni aviso.** El estado *Suspendida por falta de pago* se calcula en el momento de cada consulta (D54): desde el día 14 sin pago del mes, el veterinario la ve suspendida y no puede registrar consumos; al pagar la deuda (CU-26) vuelve a estar *Al día*. El proceso programado de CU-44 y el aviso de CU-48 no entran.
+- **Ficha sin foto.** La foto de la mascota (CU-13 y CU-14) queda para después de la entrega.
+- **Inicio = búsqueda de mascotas.** Veterinarios y administrador entran a la búsqueda (CU-37); el panel global (CU-32) llega después.
 - **Infraestructura sin costo.** Next.js (TypeScript), Supabase Free y Vercel Hobby, sin ninguna tarjeta cargada (el porqué está en [stack.md](stack.md)). Hay una base de prueba para el desarrollo y otra real; el desarrollo nunca toca la real.
 
 ### Riesgos aceptados
@@ -49,6 +51,8 @@ Estas reglas valen solo para la v1 y se reemplazan cuando llegue el caso de uso 
 | CU-32 Panel global · CU-34 Historial de pagos por mascota | Buscar la mascota y ver su ficha. **Prioridad antes del 14/11**, primera fecha en que puede haber suspensiones. |
 | CU-17 Editar plan · CU-18/19 Desactivar y reactivar plan · CU-52 Eliminar plan · CU-21 Editar tipo de prestación | Crear un plan o tipo nuevo. Un tipo cargado con error se informa al desarrollador. |
 | CU-23 Cambiar plan · CU-25 Cancelar cambio pendiente · CU-46 Aplicar cambios programados | No se puede cambiar el plan de una mascota todavía. |
+| CU-14 FA-03 Cambiar el dueño de una mascota | No disponible todavía. |
+| Foto de la mascota (CU-13, CU-14) | La ficha se carga sin foto. |
 | CU-29 Corregir pago | Anular el pago (CU-28) y registrarlo de nuevo (CU-26). El primer pago no se puede anular ni corregir (D65): si un alta se cargó con error, se informa al desarrollador. |
 | CU-30 Corregir consumo | Anular el consumo (CU-31) y que el veterinario lo registre de nuevo. |
 | CU-07 Reactivar veterinario · CU-11 Reactivar dueño · CU-51 Reactivar mascota | No disponible. |

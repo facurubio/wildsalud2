@@ -25,10 +25,11 @@ export type ResultadoAccion =
   | { ok: false; error: string; confirmar?: string }
   | null;
 
-export type Permiso = "administrador" | "veterinario";
+export type Permiso = "administrador" | "veterinario" | "consulta";
 
 // Verifica la sesión, que la cuenta esté activa y el rol, en el servidor (CU-02 RN-05).
 // "veterinario" incluye al administrador que también es veterinario (D145).
+// "consulta" es buscar mascotas y ver su ficha: administradores y veterinarios.
 export async function requerirUsuario(permiso: Permiso): Promise<UsuarioActual> {
   const sesion = await obtenerSesion();
   if (sesion.estado === "inactiva") {
@@ -41,7 +42,12 @@ export async function requerirUsuario(permiso: Permiso): Promise<UsuarioActual> 
   if (sesion.estado !== "activa") throw new ErrorDeNegocio(SIN_PERMISO);
 
   const { usuario } = sesion;
-  const autorizado = permiso === "administrador" ? usuario.rol === "administrador" : usuario.esVeterinario;
+  const autorizado =
+    permiso === "administrador"
+      ? usuario.rol === "administrador"
+      : permiso === "veterinario"
+        ? usuario.esVeterinario
+        : usuario.rol === "administrador" || usuario.esVeterinario;
   if (!autorizado) throw new ErrorDeNegocio(SIN_PERMISO);
   return usuario;
 }
@@ -90,7 +96,9 @@ export async function ejecutarUnaVez<T extends postgres.JSONValue>(
     }
 
     const resultado = await operacion(tx);
-    await tx`update public.solicitud set resultado = ${tx.json(resultado)} where clave = ${datos.clave}`;
+    // Un resultado null se guarda como el JSON null (la columna no admite el NULL de SQL).
+    const guardado = resultado === null ? tx`'null'::jsonb` : tx`${tx.json(resultado)}`;
+    await tx`update public.solicitud set resultado = ${guardado} where clave = ${datos.clave}`;
     return resultado;
   }) as Promise<T>;
 }

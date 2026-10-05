@@ -11,10 +11,12 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { consumosDeMascota } from "@/lib/atencion/consultas";
+import { mensajeConsumoRegistrado, textoPeriodo } from "@/lib/atencion/reglas";
 import { periodosAPagar } from "@/lib/cobertura/calculo";
 import { resumenCobertura } from "@/lib/cobertura/consultas";
 import { db } from "@/lib/db";
-import { formatearFecha, formatearImporte, formatearPeriodo } from "@/lib/formato";
+import { formatearFecha, formatearFechaHora, formatearImporte, formatearPeriodo } from "@/lib/formato";
 import { obtenerDueno, obtenerMascota, pagosDeMascota } from "@/lib/mascotas/consultas";
 import { formatearAfiliado, nombreCastrado, nombreSexo } from "@/lib/mascotas/validacion";
 import { esUuid } from "@/lib/operacion";
@@ -31,25 +33,38 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor: React.ReactNode })
   );
 }
 
-// Ficha de la mascota para el administrador: datos, dueño, cobertura, prestaciones, consumos y pagos.
+// Ficha de la mascota. El administrador ve todo (datos, dueño, cobertura, consumos y pagos).
+// El veterinario ve lo de CU-38: sin pagos, deuda, dirección ni email del dueño (RN-01, RN-02), y solo consulta (RN-03).
+// Quien es veterinario (también el administrador veterinario, D145) puede registrar consumos (CU-39).
 export default async function PaginaMascota({ params, searchParams }: PageProps<"/mascotas/[id]">) {
-  const { error } = await usuarioDePagina("administrador");
-  if (error) return <Aviso tipo="error">{error}</Aviso>;
+  const acceso = await usuarioDePagina("consulta");
+  if (!acceso.usuario) return <Aviso tipo="error">{acceso.error}</Aviso>;
+  const { usuario } = acceso;
+  const esAdmin = usuario.rol === "administrador";
 
   const { id } = await params;
   const mascota = esUuid(id) ? await obtenerMascota(db(), id) : null;
-  if (!mascota) return <Aviso tipo="error">La mascota ya no está disponible.</Aviso>;
+  // CU-38 EX-01: el veterinario no ve mascotas dadas de baja.
+  if (!mascota || (!esAdmin && mascota.estado === "dada_de_baja")) {
+    return <Aviso tipo="error">La mascota ya no está disponible.</Aviso>;
+  }
 
   const momento = ahora();
-  const [dueno, resumen, pagos] = await Promise.all([
+  const [dueno, resumen, pagos, consumos] = await Promise.all([
     obtenerDueno(db(), mascota.duenoId),
     resumenCobertura(db(), mascota.id, momento),
-    pagosDeMascota(mascota.id),
+    esAdmin ? pagosDeMascota(mascota.id) : Promise.resolve([]),
+    esAdmin ? consumosDeMascota(mascota.id) : Promise.resolve([]),
   ]);
   const pendientes = resumen ? periodosAPagar(resumen.cobertura, momento) : [];
 
-  const { aviso } = await searchParams;
+  const { aviso, prestacion } = await searchParams;
+  const saldoConsumido =
+    aviso === "consumo" ? resumen?.saldos.find((p) => p.tipoPrestacionId === prestacion) : undefined;
+  const consumoRegistrado = saldoConsumido ? mensajeConsumoRegistrado(saldoConsumido) : null;
   const confirmacion = {
+    consumo: consumoRegistrado?.mensaje ?? "Consumo registrado.",
+    "consumo-anulado": "Consumo anulado.",
     alta: resumen
       ? `Se dio de alta a ${mascota.nombre} con el número de afiliado ${formatearAfiliado(mascota.numeroAfiliado)} y el plan ${resumen.cobertura.planNombre}.`
       : null,
@@ -62,15 +77,23 @@ export default async function PaginaMascota({ params, searchParams }: PageProps<
   return (
     <div className="space-y-6">
       {confirmacion && <Aviso tipo="exito">{confirmacion}</Aviso>}
+      {consumoRegistrado?.alerta && <Aviso tipo="info">{consumoRegistrado.alerta}</Aviso>}
       <Encabezado
         titulo={mascota.nombre}
         descripcion={`Afiliado N.º ${formatearAfiliado(mascota.numeroAfiliado)} · ${mascota.especie}`}
         acciones={
-          mascota.estado === "activa" && (
-            <Link href={`/mascotas/${mascota.id}/editar`} className={buttonVariants({ variant: "outline" })}>
-              Editar
-            </Link>
-          )
+          <>
+            {usuario.esVeterinario && resumen?.estado === "al_dia" && (
+              <Link href={`/mascotas/${mascota.id}/consumo`} className={buttonVariants()}>
+                Registrar consumo
+              </Link>
+            )}
+            {esAdmin && mascota.estado === "activa" && (
+              <Link href={`/mascotas/${mascota.id}/editar`} className={buttonVariants({ variant: "outline" })}>
+                Editar
+              </Link>
+            )}
+          </>
         }
       />
       {mascota.estado === "dada_de_baja" && <Aviso tipo="info">La mascota está dada de baja.</Aviso>}
@@ -113,14 +136,18 @@ export default async function PaginaMascota({ params, searchParams }: PageProps<
                 <Dato
                   etiqueta="Nombre"
                   valor={
-                    <Link href={`/duenos/${dueno.id}`} className="underline-offset-4 hover:underline">
-                      {dueno.nombre} {dueno.apellido}
-                    </Link>
+                    esAdmin ? (
+                      <Link href={`/duenos/${dueno.id}`} className="underline-offset-4 hover:underline">
+                        {dueno.nombre} {dueno.apellido}
+                      </Link>
+                    ) : (
+                      `${dueno.nombre} ${dueno.apellido}`
+                    )
                   }
                 />
                 <Dato etiqueta="DNI" valor={dueno.dni} />
                 <Dato etiqueta="Teléfono" valor={dueno.telefono} />
-                <Dato etiqueta="Forma de pago preferida" valor={formasDePago[dueno.formaPagoPreferida]} />
+                {esAdmin && <Dato etiqueta="Forma de pago preferida" valor={formasDePago[dueno.formaPagoPreferida]} />}
               </dl>
             )}
           </CardContent>
@@ -130,7 +157,7 @@ export default async function PaginaMascota({ params, searchParams }: PageProps<
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <CardTitle>Cobertura</CardTitle>
-          {resumen && pendientes.length > 0 && (
+          {esAdmin && resumen && pendientes.length > 0 && (
             <Link href={`/mascotas/${mascota.id}/pago`} className={buttonVariants({ size: "sm" })}>
               Registrar pago
             </Link>
@@ -148,10 +175,10 @@ export default async function PaginaMascota({ params, searchParams }: PageProps<
               </>
             )}
           </div>
-          {resumen && resumen.periodosAdeudados.length > 0 && (
+          {esAdmin && resumen && resumen.periodosAdeudados.length > 0 && (
             <p className="text-sm">Períodos adeudados: {textoPeriodos(resumen.periodosAdeudados)}.</p>
           )}
-          {resumen && pendientes.length > 0 && resumen.periodosAdeudados.length === 0 && (
+          {esAdmin && resumen && pendientes.length > 0 && resumen.periodosAdeudados.length === 0 && (
             <p className="text-sm text-muted-foreground">
               Cuota de {formatearPeriodo(pendientes[0])} pendiente: vence el día 13.
             </p>
@@ -160,7 +187,7 @@ export default async function PaginaMascota({ params, searchParams }: PageProps<
         </CardContent>
       </Card>
 
-      {resumen && (
+      {!esAdmin && resumen && (
         <Card>
           <CardHeader>
             <CardTitle>Consumos del período en curso</CardTitle>
@@ -171,6 +198,58 @@ export default async function PaginaMascota({ params, searchParams }: PageProps<
         </Card>
       )}
 
+      {esAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Consumos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {consumos.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sin consumos.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Prestación</TableHead>
+                    <TableHead className="hidden sm:table-cell">Período</TableHead>
+                    <TableHead className="hidden md:table-cell">Veterinario</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {consumos.map((c) => (
+                    <TableRow key={c.id} className={c.estado === "anulado" ? "text-muted-foreground" : undefined}>
+                      <TableCell>{formatearFechaHora(c.registradoEn)}</TableCell>
+                      <TableCell>{c.prestacion}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{textoPeriodo(c)}</TableCell>
+                      <TableCell className="hidden whitespace-normal md:table-cell">
+                        {c.veterinario} · {c.veterinaria}
+                      </TableCell>
+                      <TableCell className="whitespace-normal">
+                        {c.estado === "anulado" ? `Anulado: ${c.motivoAnulacion}` : "Válido"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {c.estado === "valido" && (
+                          <Link
+                            href={`/mascotas/${mascota.id}/consumos/${c.id}/anular`}
+                            className="text-sm underline-offset-4 hover:underline"
+                          >
+                            Anular
+                          </Link>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {esAdmin && (
       <Card>
         <CardHeader>
           <CardTitle>Pagos</CardTitle>
@@ -214,6 +293,7 @@ export default async function PaginaMascota({ params, searchParams }: PageProps<
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
