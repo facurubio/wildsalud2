@@ -34,7 +34,8 @@ Estas reglas valen solo para la v1 y se reemplazan cuando llegue el caso de uso 
 - **Edición de planes solo sin mascotas.** Un plan se puede editar libremente mientras ninguna mascota lo tenga. Cuando una mascota ya lo tiene, queda bloqueado hasta que llegue CU-17 Editar plan. Si hace falta otro precio o condiciones, se crea un plan nuevo.
 - **Suspensión calculada, sin proceso ni aviso.** El estado *Suspendida por falta de pago* se calcula en el momento de cada consulta (D54): desde el día 14 sin pago del mes, el veterinario la ve suspendida y no puede registrar consumos; al pagar la deuda (CU-26) vuelve a estar *Al día*. El proceso programado de CU-44 y el aviso de CU-48 no entran.
 - **Ficha sin foto.** La foto de la mascota (CU-13 y CU-14) queda para después de la entrega.
-- **Inicio = búsqueda de mascotas.** Veterinarios y administrador entran a la búsqueda (CU-37); el panel global (CU-32) llega después.
+- **Inicio = búsqueda de mascotas.** Veterinarios y administrador entran a la búsqueda (CU-37); el panel global (CU-32) llega después. Sin texto, el administrador ve el listado de todas las mascotas (D140); el veterinario siempre busca (D69).
+- **Alta de mascota desde la sección Mascotas.** El dueño se elige en el mismo formulario por su DNI (también se puede empezar desde la ficha del dueño). Las reglas de CU-13 no cambian: el dueño tiene que existir, no estar dado de baja y no tener deuda.
 - **Infraestructura sin costo.** Next.js (TypeScript), Supabase Free y Vercel Hobby, sin ninguna tarjeta cargada (el porqué está en [stack.md](stack.md)). Hay una base de prueba para el desarrollo y otra real; el desarrollo nunca toca la real.
 
 ### Riesgos aceptados

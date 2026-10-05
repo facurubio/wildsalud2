@@ -19,14 +19,17 @@ export type ResultadoBusqueda = {
 
 // CU-37: mascotas no dadas de baja (RN-01), ordenadas por nombre y de a 20 (RN-04).
 // El DNI y el teléfono del dueño no se devuelven: se ven solo en la ficha (RN-03).
+// Sin criterio ("todas") lista todas las mascotas no dadas de baja: solo para el administrador (D140).
 export async function buscarMascotas(
-  criterio: Exclude<CriterioBusqueda, { tipo: "invalido" }>,
+  criterio: Exclude<CriterioBusqueda, { tipo: "invalido" }> | { tipo: "todas" },
   pagina: number,
   ahora: Date,
   sql: Sql = db(),
 ): Promise<{ total: number; resultados: ResultadoBusqueda[] }> {
   const condicion =
-    criterio.tipo === "afiliado"
+    criterio.tipo === "todas"
+      ? sql`true`
+      : criterio.tipo === "afiliado"
       ? sql`m.numero_afiliado = ${criterio.numero}`
       : criterio.tipo === "dni"
         ? sql`u.dni = ${criterio.dni}`

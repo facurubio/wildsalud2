@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { periodosAPagar } from "@/lib/cobertura/calculo";
 import { coberturaVigente, mascotaConDeuda, sincronizarEstado, versionesDelPlan } from "@/lib/cobertura/consultas";
+import { db } from "@/lib/db";
 import { formatearPeriodo } from "@/lib/formato";
 import { mascotaParecida, obtenerDueno, obtenerMascota } from "@/lib/mascotas/consultas";
 import { formatearAfiliado, validarFicha, type Ficha } from "@/lib/mascotas/validacion";
@@ -54,11 +55,17 @@ function leerPago(formData: FormData) {
 }
 
 // CU-13 Dar de alta mascota, con CU-22 Asignar plan y el primer pago, todo o nada (RN-07).
-export async function darDeAltaMascota(duenoId: string, _anterior: ResultadoAccion, formData: FormData): Promise<ResultadoAccion> {
+// El dueño es un campo del formulario: se identifica por su DNI (en la v1, en lugar de arrancar desde su ficha).
+export async function darDeAltaMascota(_anterior: ResultadoAccion, formData: FormData): Promise<ResultadoAccion> {
   let mascotaId: string | null = null;
   const resultado = await accion(async () => {
     const usuario = await requerirUsuario("administrador"); // EX-11
-    if (!esUuid(duenoId)) throw new ErrorDeNegocio("El dueño ya no está disponible.");
+    const dni = campo(formData, "duenoDni").replace(/[.\s]/g, "");
+    if (!dni) throw new ErrorDeNegocio("Completá el campo dueño.");
+    if (!/^\d{7,8}$/.test(dni)) throw new ErrorDeNegocio("Ingresá el DNI del dueño: 7 u 8 dígitos.");
+    const [encontrado] = await db()<{ id: string }[]>`select id from public.usuario where rol = 'dueno' and dni = ${dni}`;
+    if (!encontrado) throw new ErrorDeNegocio(`No hay ningún dueño con el DNI ${dni}. Primero dalo de alta en Dueños.`);
+    const duenoId = encontrado.id;
     const ficha = leerFicha(formData); // EX-03 a EX-05
     const planId = campo(formData, "planId");
     if (!esUuid(planId)) throw new ErrorDeNegocio("Completá el campo plan.");

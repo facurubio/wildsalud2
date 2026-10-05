@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { validarConsumo } from "@/lib/atencion/reglas";
 import { periodoDeConsumo, versionVigente } from "@/lib/cobertura/calculo";
 import { coberturaVigente, resumenCobertura, versionesDelPlan } from "@/lib/cobertura/consultas";
-import { db } from "@/lib/db";
 import { obtenerMascota } from "@/lib/mascotas/consultas";
 import {
   accion,
@@ -139,21 +138,5 @@ export async function anularConsumo(
     revalidatePath(`/mascotas/${mascotaId}`);
     redirect(`/mascotas/${mascotaId}?aviso=consumo-anulado`);
   }
-  return resultado;
-}
-
-// "Nueva mascota" desde la búsqueda: el administrador indica el DNI del dueño y sigue con CU-13.
-export async function elegirDuenoPorDni(_anterior: ResultadoAccion, formData: FormData): Promise<ResultadoAccion> {
-  let duenoId: string | null = null;
-  const resultado = await accion(async () => {
-    await requerirUsuario("administrador");
-    const dni = campo(formData, "dni").replace(/\./g, "");
-    if (!/^\d{7,8}$/.test(dni)) throw new ErrorDeNegocio("Ingresá el DNI del dueño: 7 u 8 dígitos.");
-    const [dueno] = await db()<{ id: string }[]>`select id from public.usuario where rol = 'dueno' and dni = ${dni}`;
-    if (!dueno) throw new ErrorDeNegocio(`No hay ningún dueño con el DNI ${dni}. Primero dalo de alta en Dueños.`);
-    duenoId = dueno.id;
-    return "";
-  });
-  if (resultado?.ok && duenoId) redirect(`/mascotas/nueva?dueno=${duenoId}`);
   return resultado;
 }

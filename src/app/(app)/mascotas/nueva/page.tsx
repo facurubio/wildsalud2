@@ -2,55 +2,45 @@ import { Aviso } from "@/components/aviso";
 import { Encabezado } from "@/components/encabezado";
 import { CamposFicha } from "@/components/mascota/campos-ficha";
 import { Card, CardContent } from "@/components/ui/card";
-import { mascotaConDeuda } from "@/lib/cobertura/consultas";
 import { db } from "@/lib/db";
-import { obtenerDueno, planesParaAsignar } from "@/lib/mascotas/consultas";
+import { planesParaAsignar } from "@/lib/mascotas/consultas";
 import { esUuid } from "@/lib/operacion";
 import { usuarioDePagina } from "@/lib/pagina";
+import type { FormaPago } from "@/lib/pagos/reglas";
 import { ahora, fechaHoy, periodoMensual } from "@/lib/tiempo";
 import { darDeAltaMascota } from "../acciones";
 import { FormularioAlta } from "./formulario-alta";
 
-// CU-13 Dar de alta mascota, desde la ficha del dueño (/mascotas/nueva?dueno=<id>).
+// CU-13 Dar de alta mascota. El dueño se elige en el mismo formulario; desde la ficha del dueño
+// (/mascotas/nueva?dueno=<id>) llega ya elegido. Su cuenta activa y su deuda se validan al confirmar.
 export default async function PaginaNuevaMascota({ searchParams }: PageProps<"/mascotas/nueva">) {
   const { error } = await usuarioDePagina("administrador");
   if (error) return <Aviso tipo="error">{error}</Aviso>;
 
   const { dueno: duenoId } = await searchParams;
-  const dueno = typeof duenoId === "string" && esUuid(duenoId) ? await obtenerDueno(db(), duenoId) : null;
-  if (!dueno) return <Aviso tipo="error">Elegí el dueño desde su ficha para darle de alta una mascota.</Aviso>;
-  const nombreDueno = `${dueno.nombre} ${dueno.apellido}`;
+  const duenos = await db()<{ id: string; dni: string; nombre: string; forma_pago_preferida: FormaPago }[]>`
+    select u.id, u.dni, u.apellido || ', ' || u.nombre as nombre, d.forma_pago_preferida
+    from public.usuario u join public.dueno d on d.usuario_id = u.id
+    where u.rol = 'dueno' and u.estado_cuenta <> 'inactivo'
+    order by public.normalizar(u.apellido), public.normalizar(u.nombre)
+  `;
+  const inicial = typeof duenoId === "string" && esUuid(duenoId) ? duenos.find((d) => d.id === duenoId) : undefined;
 
-  // Paso 2: dueño no dado de baja (EX-01) y sin deuda (EX-02).
-  if (dueno.estadoCuenta === "inactivo") {
-    return (
-      <Aviso tipo="error">
-        {nombreDueno} tiene la cuenta inactiva. Para darle de alta una mascota, primero reactivá su cuenta desde su ficha.
-      </Aviso>
-    );
-  }
   const momento = ahora();
-  const conDeuda = await mascotaConDeuda(db(), dueno.id, momento);
-  if (conDeuda) {
-    return (
-      <Aviso tipo="error">
-        {nombreDueno} tiene deuda pendiente de {conDeuda.nombre}. No se puede asignar un plan hasta saldarla.
-      </Aviso>
-    );
-  }
-
   const periodo = periodoMensual(momento);
   const planes = await planesParaAsignar(db(), periodo);
 
   return (
     <div className="space-y-6">
-      <Encabezado titulo="Dar de alta mascota" descripcion={`Dueño: ${nombreDueno} · DNI ${dueno.dni}`} />
+      <Encabezado titulo="Dar de alta mascota" descripcion="Se registra con su plan y el pago de la cuota del mes en curso." />
+      {duenos.length === 0 && <Aviso tipo="info">Todavía no hay dueños. Primero dalo de alta en Dueños.</Aviso>}
       <Card>
         <CardContent>
           <FormularioAlta
-            accion={darDeAltaMascota.bind(null, dueno.id)}
+            accion={darDeAltaMascota}
+            duenos={duenos.map((d) => ({ dni: d.dni, nombre: d.nombre, formaPagoPreferida: d.forma_pago_preferida }))}
+            duenoInicial={inicial?.dni}
             planes={planes}
-            formaPreferida={dueno.formaPagoPreferida}
             hoy={fechaHoy(momento)}
             periodo={periodo}
           >

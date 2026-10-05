@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Aviso } from "@/components/aviso";
 import { Encabezado } from "@/components/encabezado";
-import { Campo, Formulario } from "@/components/formulario";
 import { EstadoCoberturaBadge } from "@/components/mascota/cobertura";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +12,6 @@ import { interpretarBusqueda, MENSAJE_BUSQUEDA_CORTA, POR_PAGINA } from "@/lib/a
 import { formatearAfiliado } from "@/lib/mascotas/validacion";
 import { usuarioDePagina } from "@/lib/pagina";
 import { ahora } from "@/lib/tiempo";
-import { elegirDuenoPorDni } from "./acciones-atencion";
 
 // CU-37 Buscar mascota: pantalla de inicio del veterinario. También la usa el administrador.
 export default async function PaginaMascotas({ searchParams }: PageProps<"/mascotas">) {
@@ -24,10 +22,14 @@ export default async function PaginaMascotas({ searchParams }: PageProps<"/masco
   const parametros = await searchParams;
   const q = typeof parametros.q === "string" ? parametros.q : "";
   const pagina = Math.max(1, Number(parametros.pagina) || 1);
+  const esAdmin = usuario.rol === "administrador";
   const criterio = q.trim() ? interpretarBusqueda(q) : null;
 
+  // Sin texto, el administrador ve todas las mascotas (D140); el veterinario tiene que buscar (D69, CU-37).
   let busqueda: Awaited<ReturnType<typeof buscarMascotas>> | null = null;
-  if (criterio && criterio.tipo !== "invalido") {
+  if (!criterio && esAdmin) {
+    busqueda = await buscarMascotas({ tipo: "todas" }, pagina, ahora());
+  } else if (criterio && criterio.tipo !== "invalido") {
     busqueda = await buscarMascotas(criterio, pagina, ahora());
     // FA-01: un número de afiliado exacto abre directamente la ficha.
     if (criterio.tipo === "afiliado" && busqueda.total === 1) redirect(`/mascotas/${busqueda.resultados[0].id}`);
@@ -50,15 +52,29 @@ export default async function PaginaMascotas({ searchParams }: PageProps<"/masco
       <Encabezado
         titulo="Mascotas"
         descripcion="Buscá por número de afiliado, DNI del dueño, nombre de la mascota o apellido del dueño."
+        acciones={
+          esAdmin && (
+            <Link href="/mascotas/nueva" className={buttonVariants()}>
+              Dar de alta mascota
+            </Link>
+          )
+        }
       />
 
       <form action="/mascotas" className="flex gap-2">
         <Input name="q" defaultValue={q} placeholder="Ej.: 000123, 30111222, Luna o Gómez" aria-label="Buscar mascota" autoFocus />
         <Button type="submit">Buscar</Button>
+        {q && (
+          <Link href="/mascotas" className={buttonVariants({ variant: "ghost" })}>
+            Limpiar
+          </Link>
+        )}
       </form>
 
       {criterio?.tipo === "invalido" && <Aviso tipo="error">{MENSAJE_BUSQUEDA_CORTA}</Aviso>}
-      {busqueda && busqueda.total === 0 && <Aviso tipo="info">No se encontraron mascotas con esos datos.</Aviso>}
+      {busqueda && busqueda.total === 0 && (
+        <Aviso tipo="info">{criterio ? "No se encontraron mascotas con esos datos." : "Todavía no hay mascotas."}</Aviso>
+      )}
 
       {busqueda && busqueda.total > 0 && (
         <Card>
@@ -126,17 +142,6 @@ export default async function PaginaMascotas({ searchParams }: PageProps<"/masco
         </Card>
       )}
 
-      {usuario.rol === "administrador" && (
-        <Card>
-          <CardContent>
-            <Formulario accion={elegirDuenoPorDni} textoBoton="Dar de alta mascota" className="sm:flex sm:items-end sm:gap-3 sm:space-y-0">
-              <Campo etiqueta="Nueva mascota: DNI del dueño" htmlFor="dni" className="sm:flex-1">
-                <Input id="dni" name="dni" inputMode="numeric" placeholder="Ej.: 30111222" />
-              </Campo>
-            </Formulario>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
