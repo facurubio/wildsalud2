@@ -24,33 +24,77 @@ export function periodosEntre(desde: Periodo, hasta: Periodo): Periodo[] {
   return periodos;
 }
 
+// Un pago de la cobertura con su historia: cuándo se registró y, si se anuló, cuándo.
+export type MovimientoPago = { periodo: Periodo; registradoEn: Date; anuladoEn: Date | null };
+
 export type DatosEstado = {
   iniciadaEn: Date;
   dadaDeBaja: boolean;
-  periodosPagos: Periodo[]; // períodos con un pago válido de esta cobertura
+  pagos: MovimientoPago[];
 };
 
 export type ResultadoEstado = {
   estado: EstadoCobertura;
   // Períodos vencidos sin pago: los meses anteriores al actual y, desde el día 14, también el actual.
   periodosAdeudados: Periodo[];
+  // Desde cuándo está suspendida (la primera suspensión sin reactivación; de acá se cuenta el plazo de D8/D67).
+  suspendidaDesde: Date | null;
 };
 
-// RN-01 de CU-39 y CU-44: del 1 al 13 sigue al día aunque no esté paga la cuota del mes;
-// desde las 00:00 del 14 sin pago del mes, está suspendida. Un mes anterior impago también la suspende
-// (por ejemplo, después de anular un pago, D36).
+// Períodos con un pago válido en un momento dado.
+export function periodosPagosEn(pagos: MovimientoPago[], momento: Date): Periodo[] {
+  return pagos
+    .filter((p) => p.registradoEn <= momento && (!p.anuladoEn || p.anuladoEn > momento))
+    .map((p) => p.periodo);
+}
+
+function vencido(periodo: Periodo, momento: Date): boolean {
+  const actual = periodoMensual(momento);
+  return periodo < actual || (periodo === actual && fechaArgentina(momento).dia >= DIA_DE_SUSPENSION);
+}
+
+// Estado de la cobertura en `ahora`, reconstruido con la historia de vencimientos, pagos y anulaciones
+// (así no depende de que los procesos automáticos se hayan ejecutado, D54):
+// - Se suspende a las 00:00 del día 14 de un mes sin pago (CU-44 RN-01, D17), o en el momento en que se anula
+//   el pago de un período ya vencido (CU-28 RN-04, D36).
+// - Una cobertura suspendida vuelve a estar al día recién cuando no queda ningún período impago hasta el mes en
+//   curso inclusive, en el momento de ese pago (CU-26 RN-06, D4, D5). Pagar solo la deuda vencida no alcanza.
 export function calcularEstado(datos: DatosEstado, ahora: Date): ResultadoEstado {
-  if (datos.dadaDeBaja) return { estado: "dada_de_baja", periodosAdeudados: [] };
+  const pagosAhora = new Set(periodosPagosEn(datos.pagos, ahora));
+  const periodos = periodosEntre(periodoMensual(datos.iniciadaEn), periodoMensual(ahora));
+  const periodosAdeudados = periodos.filter((p) => !pagosAhora.has(p) && vencido(p, ahora));
+  if (datos.dadaDeBaja) return { estado: "dada_de_baja", periodosAdeudados: [], suspendidaDesde: null };
 
-  const actual = periodoMensual(ahora);
-  const pagos = new Set(datos.periodosPagos);
-  const venceElActual = fechaArgentina(ahora).dia >= DIA_DE_SUSPENSION;
+  type Evento = { momento: Date; orden: number; aplicar: (pagos: Set<Periodo>) => void; periodo: Periodo };
+  const eventos: Evento[] = [];
+  for (const pago of datos.pagos) {
+    if (pago.registradoEn <= ahora) eventos.push({ momento: pago.registradoEn, orden: 0, periodo: pago.periodo, aplicar: (s) => s.add(pago.periodo) });
+    if (pago.anuladoEn && pago.anuladoEn <= ahora) {
+      eventos.push({ momento: pago.anuladoEn, orden: 1, periodo: pago.periodo, aplicar: (s) => s.delete(pago.periodo) });
+    }
+  }
+  for (const periodo of periodos) {
+    const vence = vencimientoDelPeriodo(periodo);
+    if (vence >= datos.iniciadaEn && vence <= ahora) eventos.push({ momento: vence, orden: 2, periodo, aplicar: () => {} });
+  }
+  eventos.sort((a, b) => a.momento.getTime() - b.momento.getTime() || a.orden - b.orden);
 
-  const periodosAdeudados = periodosEntre(periodoMensual(datos.iniciadaEn), actual).filter(
-    (p) => !pagos.has(p) && (p < actual || venceElActual),
-  );
+  const pagos = new Set<Periodo>();
+  let suspendidaDesde: Date | null = null;
+  for (const evento of eventos) {
+    evento.aplicar(pagos);
+    if (evento.orden === 0 && suspendidaDesde) {
+      // Reactivación: todo pago hasta el mes en curso inclusive (del momento del pago).
+      const hasta = periodoMensual(evento.momento);
+      if (periodos.filter((p) => p <= hasta).every((p) => pagos.has(p))) suspendidaDesde = null;
+    } else if (evento.orden === 1 && !suspendidaDesde && vencido(evento.periodo, evento.momento)) {
+      suspendidaDesde = evento.momento; // anulación de un período vencido
+    } else if (evento.orden === 2 && !suspendidaDesde && !pagos.has(evento.periodo)) {
+      suspendidaDesde = evento.momento; // vencimiento sin pago
+    }
+  }
 
-  return { estado: periodosAdeudados.length > 0 ? "suspendida" : "al_dia", periodosAdeudados };
+  return { estado: suspendidaDesde ? "suspendida" : "al_dia", periodosAdeudados, suspendidaDesde };
 }
 
 // D11, D12: la antigüedad es la cantidad de períodos pagos de la cobertura, sin importar cuándo se pagaron.
@@ -111,4 +155,25 @@ export function calcularSaldos(
       periodosQueFaltan > 0 ? "no_habilitada" : saldo === 0 ? "agotada" : "disponible";
     return { ...p, periodo, consumidas, saldo, estado, periodosQueFaltan };
   });
+}
+
+// D27: al darse de baja, quedan como deuda congelada los períodos impagos vencidos antes del mes de la baja.
+export function periodosCongelados(
+  datos: { iniciadaEn: Date; bajaEn: Date; periodosPagos: Periodo[] },
+): Periodo[] {
+  const pagos = new Set(datos.periodosPagos);
+  const mesDeBaja = periodoMensual(datos.bajaEn);
+  return periodosEntre(periodoMensual(datos.iniciadaEn), mesDeBaja).filter((p) => p < mesDeBaja && !pagos.has(p));
+}
+
+// Momento en que vence un período impago: el día 14 a las 00:00 de ese mes, hora de Argentina (D1).
+export function vencimientoDelPeriodo(periodo: Periodo): Date {
+  return new Date(`${periodo.slice(0, 8)}${DIA_DE_SUSPENSION}T00:00:00-03:00`);
+}
+
+// Períodos que se pueden pagar de una cobertura vigente (CU-26 RN-02): los impagos desde el más antiguo
+// hasta el mes en curso inclusive, nunca meses futuros.
+export function periodosAPagar(datos: { iniciadaEn: Date; periodosPagos: Periodo[] }, ahora: Date): Periodo[] {
+  const pagos = new Set(datos.periodosPagos);
+  return periodosEntre(periodoMensual(datos.iniciadaEn), periodoMensual(ahora)).filter((p) => !pagos.has(p));
 }

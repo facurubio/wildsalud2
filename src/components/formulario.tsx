@@ -47,6 +47,12 @@ export function Formulario({
       <input ref={clave} type="hidden" name="clave" />
       {resultado && <Aviso tipo={resultado.ok ? "exito" : "error"}>{resultado.ok ? resultado.mensaje : resultado.error}</Aviso>}
       {children}
+      {resultado && !resultado.ok && resultado.confirmar && (
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input type="checkbox" name="confirmado" value="si" className="size-4" />
+          {resultado.confirmar}
+        </label>
+      )}
       <Button type="submit" disabled={pendiente} className="w-full sm:w-auto">
         {pendiente ? "Guardando…" : textoBoton}
       </Button>

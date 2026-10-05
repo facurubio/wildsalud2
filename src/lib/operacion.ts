@@ -8,8 +8,22 @@ export const SIN_PERMISO = "No tenés permiso para hacer esta operación.";
 // Error que se muestra tal cual a la persona: los mensajes exactos de los casos de uso.
 export class ErrorDeNegocio extends Error {}
 
+// Aviso que la persona tiene que aceptar para seguir (por ejemplo, CU-13 FA-02: posible mascota duplicada).
+// El formulario muestra el mensaje con una casilla "confirmado"; al volver a enviar con la casilla marcada, sigue.
+export class PedidoDeConfirmacion extends Error {
+  constructor(
+    mensaje: string,
+    readonly textoConfirmacion: string,
+  ) {
+    super(mensaje);
+  }
+}
+
 // Resultado de una acción de formulario.
-export type ResultadoAccion = { ok: true; mensaje: string } | { ok: false; error: string } | null;
+export type ResultadoAccion =
+  | { ok: true; mensaje: string }
+  | { ok: false; error: string; confirmar?: string }
+  | null;
 
 export type Permiso = "administrador" | "veterinario";
 
@@ -88,6 +102,7 @@ export async function accion(fn: () => Promise<string>): Promise<ResultadoAccion
     return { ok: true, mensaje: await fn() };
   } catch (error) {
     if (error instanceof ErrorDeNegocio) return { ok: false, error: error.message };
+    if (error instanceof PedidoDeConfirmacion) return { ok: false, error: error.message, confirmar: error.textoConfirmacion };
     console.error(error);
     return { ok: false, error: "No pudimos completar la operación. Intentá de nuevo." };
   }
