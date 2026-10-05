@@ -370,9 +370,9 @@ erDiagram
 | Columna | Tipo | Obligatoria | Reglas | Origen |
 |---------|------|-------------|--------|--------|
 | `id` | uuid | Sí | Clave primaria. | |
-| `nombre` | text | Sí | Hasta 40 caracteres. Único sin distinguir mayúsculas ni acentos. Arranca con los 7 del documento. No se dan de baja. | D31, D132, D133 |
+| `nombre` | text | Sí | Hasta 40 caracteres. Único sin distinguir mayúsculas ni acentos. No se dan de baja. En la v1 la tabla **arranca vacía** y el administrador crea los suyos con CU-20 ([alcance-v1.md](alcance-v1.md)); D31 prevé arrancar con los 7 del documento. | D31, D132, D133 |
 | `descripcion` | text | No | Hasta 200 caracteres. | D132 |
-| `creado_en`, `creado_por` | timestamptz, uuid → `usuario` | Sí | Vacío en `creado_por` para los 7 iniciales. | CU-20 |
+| `creado_en`, `creado_por` | timestamptz, uuid → `usuario` | Sí | Administrador que lo creó. | CU-20 |
 
 ### `plan` — v1
 
@@ -557,9 +557,9 @@ erDiagram
 
 Solo se insertan filas: la base no permite modificarlas ni borrarlas, ni siquiera al administrador (CU-36 RN-03).
 
-### `envio` — v1 (solo invitaciones; los avisos, en la v1.1)
+### `envio` — v1.1
 
-Cada email que manda el sistema: invitaciones y avisos.
+Cada email que manda el sistema: invitaciones y avisos. En la v1 no se envían emails: el administrador copia el enlace de invitación y lo manda por WhatsApp ([alcance-v1.md](alcance-v1.md)), así que la invitación queda registrada solo en `invitacion`.
 
 | Columna | Tipo | Obligatoria | Reglas | Origen |
 |---------|------|-------------|--------|--------|
@@ -643,8 +643,8 @@ El ingreso con Google o Apple lo resuelve Supabase Auth, que crea su propio usua
 
 ## Qué se crea en la v1
 
-**v1 (18 tablas):** `usuario`, `veterinario`, `dueno`, `vinculacion`, `invitacion`, `sesion`, `mascota`, `tipo_prestacion`, `plan`, `plan_version`, `plan_prestacion`, `cobertura`, `cobertura_plan`, `pago`, `consumo`, `auditoria`, `envio`, `solicitud`.
+**v1 (17 tablas):** `usuario`, `veterinario`, `dueno`, `vinculacion`, `invitacion`, `sesion`, `mascota`, `tipo_prestacion`, `plan`, `plan_version`, `plan_prestacion`, `cobertura`, `cobertura_plan`, `pago`, `consumo`, `auditoria`, `solicitud`.
 
-**v1.1 (2 tablas):** `cambio_programado` (cambios de plan y bajas programadas) y `ejecucion_proceso` (procesos automáticos y avisos por email).
+**v1.1 (3 tablas):** `cambio_programado` (cambios de plan y bajas programadas), `ejecucion_proceso` (procesos automáticos y avisos por email) y `envio` (emails de invitaciones y avisos).
 
 Algunas tablas de la v1 tienen datos que la v1 todavía no usa, por ejemplo `cobertura_plan` con una sola fila por cobertura mientras no haya cambios de plan. Se crean igual completas para no tener que modificar tablas que ya tienen datos reales cuando llegue la v1.1.

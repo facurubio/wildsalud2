@@ -28,6 +28,7 @@ Estas reglas valen solo para la v1 y se reemplazan cuando llegue el caso de uso 
 
 - **Solo Google.** Se inicia sesión únicamente con Google. Apple queda afuera porque su cuenta de desarrollador es paga.
 - **Invitación por WhatsApp, sin emails.** La v1 no envía emails. Al dar de alta un veterinario, el sistema genera el enlace de invitación de un solo uso (D37) y el administrador lo copia y lo envía por WhatsApp. Si el enlace vence o se pierde, el administrador genera uno nuevo desde la ficha del veterinario.
+- **Catálogo vacío.** Los tipos de prestación arrancan vacíos (D31 prevé cargar los 7 del documento): el administrador crea los suyos con CU-20, porque en la v1 no se pueden editar.
 - **Dueños sin cuenta.** Los dueños se cargan con todos sus datos, pero no se les genera invitación hasta que exista el portal del dueño.
 - **Administrador inicial.** La cuenta del administrador, con sus datos de veterinario, se carga por configuración (D50, D145), antes de la entrega.
 - **Edición de planes solo sin mascotas.** Un plan se puede editar libremente mientras ninguna mascota lo tenga. Cuando una mascota ya lo tiene, queda bloqueado hasta que llegue CU-17 Editar plan. Si hace falta otro precio o condiciones, se crea un plan nuevo.
