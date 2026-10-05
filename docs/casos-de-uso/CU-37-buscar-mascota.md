@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Actor principal** | Veterinario asociado |
+| **Actor principal** | Veterinario asociado (también el administrador que es veterinario, D145) |
 | **Objetivo** | Identificar rápidamente a la mascota que está atendiendo, para abrir su ficha. |
 | **Disparador** | Llega a la consulta una mascota que dice estar afiliada a WildSalud. |
 | **Relaciones** | Es la pantalla de inicio del veterinario después de iniciar sesión (CU-02). Desde un resultado se abre CU-38 Consultar ficha y cobertura. |

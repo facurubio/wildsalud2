@@ -54,7 +54,7 @@ En todas las excepciones **no se inicia sesión**, no se crea ningún usuario ni
 | **RN-01** | **Solo Google o Apple.** Todos los roles ingresan solo con Google o Apple. WildSalud no tiene contraseñas propias, ni registro, ni "Olvidé mi contraseña": la contraseña se recupera con el propio proveedor, y una cuenta perdida se reemplaza con una invitación nueva (CU-12). | RF-AUT-01, RF-AUT-05, RF-ROL-05, RNF-SEG-06, D24, D37 |
 | **RN-02** | **Identificación por la cuenta vinculada.** El usuario se busca por el proveedor y el identificador de la cuenta, nunca por el email. Una cuenta no vinculada no entra aunque su email coincida con el de un usuario, y en este caso no se vincula: solo se vincula desde una invitación (CU-01). El mensaje no revela si existe un usuario con ese email. | RF-ROL-02, RF-VET-03, D24, D37, D88 |
 | **RN-03** | **Solo cuentas activas.** Solo inicia sesión un usuario en estado *Activo*. Un usuario *Invitado* todavía no tiene cuenta vinculada, también cuando fue reactivado: la reactivación descarta la vinculación anterior. Uno *Inactivo* (dado de baja) se rechaza. | RF-AUT-04, RF-ROL-06, RF-VET-05, D47, D92, D97 |
-| **RN-04** | **Un rol por cuenta.** La sesión tiene el único rol del usuario y muestra solo sus funciones; no hay selector de rol. Una persona que es veterinaria y dueña ingresa con una cuenta distinta para cada rol. | RF-AUT-02, RF-AUT-03, RF-ROL-03, D46 |
+| **RN-04** | **Un rol por cuenta.** La sesión tiene el único rol del usuario y muestra solo sus funciones; no hay selector de rol. Una persona que es veterinaria y dueña ingresa con una cuenta distinta para cada rol. **Excepción:** un administrador que también es veterinario entra con una sola cuenta y ve las funciones de los dos roles; su pantalla de inicio es la del administrador. | RF-AUT-02, RF-AUT-03, RF-ROL-03, D46, D145 |
 | **RN-05** | **Permisos en el sistema.** En cada operación y consulta el sistema verifica que la sesión esté vigente, que la cuenta siga en estado *Activo* y que el rol tenga permiso, sin depender de ocultar opciones en la pantalla. Si no tiene permiso, el mensaje es siempre *"No tenés permiso para hacer esta operación."* | RF-AUT-01, RF-AUT-03, RNF-SEG-02, RNF-SEG-07, D110 |
 | **RN-06** | **Varios administradores.** Cada administrador ingresa con su propia cuenta; puede haber varios con sesión abierta a la vez. | RF-AUT-02, D15 |
 | **RN-07** | **Duración de la sesión.** La sesión vence a las **4 horas sin actividad**, igual para todos los roles (ver CU-03, FA-01). | RNF-SEG-01, D90 |
@@ -195,6 +195,14 @@ Feature: CU-02 Iniciar sesión con Google/Apple
       | Apple     | ana.lopez@icloud.com | Veterinario asociado |
       | Google    | ana.lopez@gmail.com  | Dueño afiliado       |
 
+  @RN-04 @RF-ROL-03 @D145
+  Scenario: Un administrador que también es veterinario entra con una sola cuenta
+    Given el administrador "Marta Ruiz" también es veterinaria de la veterinaria "Patitas Centro"
+    When "Marta Ruiz" ingresa con su cuenta de Google vinculada
+    Then queda con la sesión iniciada con el rol "Administrador"
+    And ve el panel global como pantalla de inicio
+    And también puede buscar mascotas y registrar consumos como veterinaria
+
   @RN-05 @RF-AUT-03 @RNF-SEG-07 @D110
   Scenario: El sistema rechaza una operación de otro rol aunque no se haga desde la pantalla
     Given "Carla Gómez" tiene una sesión abierta
@@ -235,7 +243,7 @@ Feature: CU-02 Iniciar sesión con Google/Apple
 | D15 | RN-06 |
 | D24 | Paso 2, RN-01, RN-02, EX-01 |
 | D37 | RN-01, RN-02, FA-04, EX-01 |
-| D46 | RN-04 |
+| D46, D145 | RN-04 |
 | D47, D92 | RN-03, EX-02 |
 | D88 | RN-02, EX-01 |
 | D90 | RN-07, FA-01 |

@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Actor principal** | Veterinario asociado |
+| **Actor principal** | Veterinario asociado (también el administrador que es veterinario, D145) |
 | **Objetivo** | Ver la ficha de la mascota, los datos de contacto de su dueño y el estado de su cobertura con las prestaciones disponibles, para decidir cómo atenderla. |
 | **Disparador** | El veterinario eligió una mascota en CU-37 Buscar mascota. |
 | **Relaciones** | Se llega desde CU-37. Desde la ficha se inicia CU-39 Registrar consumo. |

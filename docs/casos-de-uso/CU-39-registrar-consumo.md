@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Actor principal** | Veterinario asociado |
+| **Actor principal** | Veterinario asociado (también el administrador que es veterinario, D145) |
 | **Objetivo** | Registrar el uso de una prestación del plan de una mascota durante la atención, descontándola de su saldo. |
 | **Disparador** | El veterinario atiende a una mascota afiliada y le brinda una prestación cubierta por el plan (consulta, vacuna, radiografía, etc.). |
 | **Relaciones** | Se inicia desde CU-38 Consultar ficha y cobertura. Las correcciones y anulaciones las hace el administrador en CU-30 y CU-31. La alerta de agotamiento se muestra al dueño en CU-43. |
@@ -68,7 +68,7 @@ En todas las excepciones **el consumo no se registra**, el sistema informa el mo
 | **RN-05** | **Orden de validación.** Se valida: cuenta activa → RN-01 → RN-02 → RN-03 → RN-04, y se informa el **primer** motivo que falla. | RF-PRE-08 |
 | **RN-06** | **Datos del consumo.** La fecha y hora es el momento del registro y no se puede elegir. Se guarda una copia de la veterinaria del veterinario en ese momento. El consumo no lleva observaciones del veterinario, porque la historia clínica queda fuera de alcance. | RF-PRE-01, D14, D26, D52 |
 | **RN-07** | **Sin duplicados.** Cada confirmación se procesa una sola vez, y dos registros simultáneos no pueden superar el límite. | RNF-INT-01, RNF-INT-02 |
-| **RN-08** | **Permisos.** Solo el veterinario registra consumos, y no puede corregirlos ni anularlos. Los mensajes no muestran datos de pagos (montos, deuda, forma de pago). | RF-PRE-09, RF-ROL-10, RF-ROL-11, D34 |
+| **RN-08** | **Permisos.** Solo el veterinario registra consumos, y no puede corregirlos ni anularlos. Un administrador que también es veterinario los registra igual que cualquier veterinario, a su nombre y con su veterinaria; un administrador que no es veterinario no registra consumos. Los mensajes no muestran datos de pagos (montos, deuda, forma de pago). | RF-PRE-09, RF-ROL-10, RF-ROL-11, D34, D145 |
 | **RN-09** | **Una unidad por consumo.** Cada registro descuenta 1 unidad de la prestación. Dos vacunas en la misma visita son dos consumos. | D51 |
 | **RN-10** | **Hora de referencia.** Todas las reglas de fecha (día 13, día 14, cambio de mes y de año) usan la hora de Argentina. | RF-PAG-03, RF-PAG-04, D53 |
 
@@ -256,6 +256,17 @@ Feature: CU-39 Registrar consumo
     When el veterinario intenta registrar una "Consulta" para "Luna"
     Then el sistema informa "La cobertura de Luna está suspendida por falta de pago."
     And el mensaje no muestra montos, cuotas adeudadas ni forma de pago
+
+  @RN-08 @D145
+  Scenario Outline: Solo un administrador que también es veterinario registra consumos
+    Given el administrador "<administrador>" inició sesión<veterinaria>
+    When "<administrador>" intenta registrar una "Consulta" para "Luna"
+    Then el resultado es "<resultado>"
+
+    Examples:
+      | administrador | veterinaria                                   | resultado                                                                                   |
+      | Marta Ruiz    | y también es veterinaria de "Patitas Centro"  | consumo registrado a nombre de "Marta Ruiz" con la veterinaria "Patitas Centro"             |
+      | Jorge Paz     |                                               | No tenés permiso para hacer esta operación.                                                 |
 ```
 
 ## Trazabilidad
@@ -274,6 +285,7 @@ Feature: CU-39 Registrar consumo
 | RF-PLA-16 | RN-02 |
 | RF-NOT-02 | FA-01 |
 | RF-ROL-08, RF-ROL-10, RF-ROL-11 | Paso 2, RN-08 |
+| RF-ROL-03, D145 | Actor principal, RN-08 |
 | RF-TRA-01 | Paso 8 |
 | RNF-SEG-07 | Nota de Excepciones |
 | RNF-INT-01, RNF-INT-02 | RN-07, EX-06, EX-07 |

@@ -20,7 +20,7 @@
 3. El administrador elige un plan.
 4. El sistema muestra el primer pago a registrar: período (mes en curso), importe y forma de pago, con la forma de pago preferida del dueño propuesta por defecto, y la fecha de pago, con la fecha de hoy propuesta por defecto.
 5. El administrador confirma o cambia la forma de pago y la fecha de pago, y confirma.
-6. El sistema valida las reglas **RN-01 a RN-06** y **RN-09**.
+6. El sistema valida las reglas **RN-01 a RN-06**, **RN-09** y **RN-11**.
 7. El sistema crea la cobertura en estado **Al día** con el plan elegido y registra el pago del mes en curso, en una sola operación.
 8. El sistema deja el registro de auditoría del alta de la cobertura y del pago.
 9. El sistema confirma la asignación y muestra el plan, el estado *Al día* y 1 período pago.
@@ -42,6 +42,7 @@ En todas las excepciones **no se crea la cobertura ni el pago**, y el sistema in
 | **EX-07** | 6 | La mascota ya tiene una cobertura vigente *Suspendida por falta de pago*. | *"{mascota} tiene una cobertura suspendida por falta de pago. Para asignarle otro plan, primero regularizá la deuda."* |
 | **EX-02** | 6 | La mascota tiene deuda congelada de una cobertura anterior. | *"{mascota} tiene deuda pendiente de una cobertura anterior. Registrá esos pagos antes de asignar un plan."* |
 | **EX-03** | 6 | El dueño tiene deuda de otra de sus mascotas. | *"{dueño} tiene deuda pendiente de {otra mascota}. No se puede asignar un plan hasta saldarla."* |
+| **EX-08** | 6 | La mascota ya tiene un pago válido del mes en curso, de una cobertura que se dio de baja ese mes. | *"{mascota} ya tiene pagado {mes} por su cobertura anterior. Se le puede asignar un plan desde el {día 1 del mes siguiente}."* |
 | **EX-04** | 6 | El plan elegido se desactivó entre que se mostró la lista y la confirmación. | *"El plan {plan} está inactivo y no se puede asignar."* |
 | **EX-05** | 6 | La fecha de pago es posterior a hoy. | *"La fecha de pago no puede ser posterior a hoy."* |
 | **EX-06** | 5 | La misma confirmación llega dos veces (doble clic o reintento de red). | Se crea **una sola** cobertura con **un solo** pago; el segundo envío devuelve el mismo resultado. |
@@ -65,6 +66,7 @@ En todas las excepciones **no se crea la cobertura ni el pago**, y el sistema in
 | **RN-08** | **Plan por mascota.** El plan se asigna a la mascota, no al dueño: dos mascotas del mismo dueño pueden tener planes distintos. | RF-MAS-03, RF-PLA-02 |
 | **RN-09** | **Fecha de pago.** Es la fecha en que el dueño pagó: por defecto hoy, puede ser anterior pero no posterior a hoy. Es informativa: la cobertura empieza en el momento en que se registra, no en la fecha de pago. | D57 |
 | **RN-10** | **Forma de pago.** Se elige de la lista fija (Efectivo, Transferencia bancaria, Tarjeta de débito, Tarjeta de crédito); por defecto, la preferida del dueño. | D7, D59 |
+| **RN-11** | **Un solo pago por mes.** Si la mascota ya tiene un pago válido del mes en curso (de una cobertura que se dio de baja ese mes), no se le puede asignar un plan hasta el día 1 del mes siguiente. Así nunca hay dos pagos válidos de la misma mascota para el mismo período y el mes no se cobra dos veces. | RF-PAG-13, D144 |
 
 ## Datos que se registran
 
@@ -145,6 +147,18 @@ Feature: CU-22 Asignar plan a una mascota
       | cobertura suspendida por falta de pago del período 2026-10    |
       | deuda congelada del período 2026-06                           |
 
+  @EX-08 @RN-11 @RF-PAG-13 @D144
+  Scenario Outline: Una mascota con el mes pago por una cobertura anterior recibe plan recién el mes siguiente
+    Given "Luna" tuvo una cobertura con el período "2026-10" pagado que se dio de baja el "20/10/2026 09:00", sin deuda
+    And la fecha y hora actual es "<fecha>"
+    When el administrador intenta asignar el plan "Plan Base" a "Luna"
+    Then el resultado es "<resultado>"
+
+    Examples:
+      | fecha            | resultado                                                                                                  |
+      | 25/10/2026 10:00 | Luna ya tiene pagado octubre de 2026 por su cobertura anterior. Se le puede asignar un plan desde el 01/11/2026. |
+      | 01/11/2026 10:00 | cobertura creada con el pago del período 2026-11                                                           |
+
   @RN-03 @D29
   Scenario: Otra mascota del dueño sin deuda no bloquea la asignación
     Given "Carla Gómez" también tiene la mascota "Toby" con cobertura "Al día"
@@ -209,6 +223,7 @@ Feature: CU-22 Asignar plan a una mascota
 | RF-PAG-07 | RN-06 |
 | RF-PAG-08 | Paso 7, Datos que se registran |
 | RF-PAG-09 | Actor principal |
+| RF-PAG-13 | RN-11, EX-08 |
 | RF-TRA-01, RNF-AUD-01 | Paso 8 |
 | RNF-INT-01 | EX-06 |
 | D2, D3 | RN-05 |
@@ -222,3 +237,4 @@ Feature: CU-22 Asignar plan a una mascota
 | D57 | RN-09, EX-05 |
 | D59 | RN-10 |
 | D107 | Relaciones (incluido por CU-51) |
+| D144 | RN-11, EX-08 |

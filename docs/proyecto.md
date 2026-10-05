@@ -245,6 +245,7 @@ La aplicación tiene como principal usuario al administrador, quien se encarga d
 - **RF-PAG-12** — Una modificación de un pago nunca debe reemplazar silenciosamente la información anterior.
   > **Precisado por [D39](decisiones.md#período-y-pagos):** la corrección se hace anulando el pago original y registrando uno nuevo enlazado.
 - **RF-PAG-13** — No podrá existir más de un pago válido correspondiente a la misma mascota y período.
+  > **Precisado por [D144](decisiones.md#período-y-pagos):** si la mascota ya tiene pagado el mes en curso por una cobertura dada de baja, no se le puede asignar un plan hasta el mes siguiente.
 - **RF-PAG-14** — El estado de cobertura deberá poder distinguir, como mínimo, entre:
     - Al día.
     - Suspendida por falta de pago.
@@ -289,6 +290,7 @@ La aplicación tiene como principal usuario al administrador, quien se encarga d
   > **Precisado por [D24](decisiones.md#usuarios-y-acceso), [D37](decisiones.md#usuarios-y-acceso):** la cuenta se habilita por invitación de un solo uso y se vincula a una cuenta de Google o Apple.
 - **RF-ROL-03** — Cada cuenta de usuario será individual y estará asociada a un único rol.
   > **Precisado por [D46](decisiones.md#usuarios-y-acceso):** una persona que es veterinario y dueño tiene dos usuarios separados, cada uno vinculado a una cuenta de Google/Apple distinta.
+  > **Ajustado por [D145](decisiones.md#usuarios-y-acceso):** un administrador puede ser también veterinario asociado con la misma cuenta.
 - **RF-ROL-04** — Un dueño afiliado tendrá una única cuenta de acceso, desde la cual podrá consultar todas las mascotas que tenga asociadas.
 - **RF-ROL-05** — Los veterinarios y dueños afiliados podrán recuperar el acceso a su cuenta mediante el mecanismo de recuperación definido por el sistema.
   > **Reemplazado por [D24](decisiones.md#usuarios-y-acceso), [D37](decisiones.md#usuarios-y-acceso):** el acceso es solo con Google o Apple; la contraseña de Google/Apple se recupera con el propio proveedor; si se pierde la cuenta, solo el administrador reenvía la invitación al email registrado para vincular una nueva.

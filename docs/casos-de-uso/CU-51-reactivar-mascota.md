@@ -15,7 +15,7 @@
 ## Flujo principal
 
 1. El administrador abre la ficha de la mascota dada de baja y elige **Reactivar**. La opción no se ofrece si la baja fue por *Fallecimiento* (**RN-02**).
-2. El sistema verifica que el dueño no esté dado de baja (**RN-03**) y que no haya deuda de la mascota ni de otras mascotas del dueño (**RN-04**).
+2. El sistema verifica que el dueño no esté dado de baja (**RN-03**), que no haya deuda de la mascota ni de otras mascotas del dueño (**RN-04**) y que la mascota no tenga pagado el mes en curso (**RN-13**).
 3. El sistema muestra el detalle de la reactivación:
    - la ficha de la mascota tal como quedó al darla de baja, como solo lectura, y su número de afiliado, que conserva;
    - el dueño;
@@ -24,7 +24,7 @@
 4. El administrador elige **Continuar**.
 5. **`«include»` CU-22 Asignar plan a una mascota, pasos 2 a 4:** el sistema muestra los planes activos, cada uno con su precio para el mes en curso; el administrador elige uno; el sistema propone el primer pago: período (mes en curso), importe, forma de pago preferida del dueño y fecha de hoy.
 6. El sistema muestra, junto con el primer pago, un resumen de la mascota y del dueño. El administrador confirma o cambia la forma y la fecha de pago, y confirma (CU-22, paso 5). Esa **única confirmación** vale para la reactivación, la cobertura y el pago.
-7. El sistema vuelve a validar **RN-01** a **RN-04** y valida las reglas de CU-22 (paso 6), en el momento de la confirmación.
+7. El sistema vuelve a validar **RN-01** a **RN-04** y **RN-13**, y valida las reglas de CU-22 (paso 6), en el momento de la confirmación.
 8. En una sola operación (**RN-05**), el sistema vuelve a poner la mascota en estado *Activa*, sobre el mismo registro y con el mismo número de afiliado (**RN-06**), y crea la cobertura *Al día* con el pago del mes en curso (CU-22, paso 7).
 9. El sistema deja el registro de auditoría de la reactivación, de la cobertura y del pago (**RN-12**).
 10. El sistema confirma: *"Se reactivó a {mascota} con el número de afiliado {número} y el plan {plan}."*, muestra la ficha con la cobertura *Al día* y 1 período pago, y ofrece **Editar ficha** (CU-14) (**RN-08**).
@@ -51,6 +51,7 @@ En todas las excepciones **la mascota sigue dada de baja y no se crea ninguna co
 | **EX-07** | 6 | La misma confirmación llega dos veces (doble clic o reintento de red). | La mascota se reactiva **una sola** vez, con **una sola** cobertura y **un solo** pago; el segundo envío devuelve el mismo resultado que el primero. |
 | **EX-08** | 1 a 7 | Un usuario que no es administrador (veterinario o dueño) intenta reactivar la mascota. | *"No tenés permiso para hacer esta operación."* |
 | **EX-09** | 1 | La mascota se dio de baja por *Fallecimiento* (por ejemplo, si el pedido se envía sin usar la pantalla, que no ofrece la opción). | *"La mascota {mascota} se dio de baja por fallecimiento y no se puede reactivar."* |
+| **EX-10** | 2 o 7 | La mascota ya tiene un pago válido del mes en curso, de la cobertura que se dio de baja ese mes (CU-22 EX-08). | *"{mascota} ya tiene pagado {mes} por su cobertura anterior. Se le puede asignar un plan desde el {día 1 del mes siguiente}."* |
 
 ## Postcondiciones
 
@@ -65,7 +66,7 @@ En todas las excepciones **la mascota sigue dada de baja y no se crea ninguna co
 | **RN-02** | **Qué mascotas se reactivan.** Solo una mascota dada de baja, por *Pedido del dueño*, por *Otro* o *por baja del dueño*, sin importar el tiempo que haya pasado. Una mascota dada de baja por *Fallecimiento* no se puede reactivar: la baja es definitiva y la opción no se ofrece. | D106, D107, D116 |
 | **RN-03** | **Dueño actual, no dado de baja.** La mascota vuelve con el dueño que tiene asignado; si hay que cambiarlo, se hace después con CU-14. El dueño no puede estar dado de baja; si lo está, primero se lo reactiva con CU-11. Su cuenta puede estar *Invitado* (por ejemplo, recién reactivado) o *Activo*. | RF-MAS-02, RNF-BAJ-03, D97, D104, D119 |
 | **RN-04** | **Sin deuda.** Si la mascota tiene deuda congelada de una cobertura anterior, o el dueño tiene deuda de cualquier otra de sus mascotas, no se puede reactivar. Son las reglas RN-02 y RN-03 de CU-22, validadas al iniciar y otra vez al confirmar. La deuda congelada se puede pagar con la mascota dada de baja (CU-26), así que se salda antes de reactivarla. | D28, D29, D38, D55, D64 |
-| **RN-05** | **Reactivación con plan y primer pago, todo o nada.** La mascota vuelve a *Activa* en la misma operación en que se crean la cobertura y el pago de la cuota completa del mes en curso (CU-22). Si la cobertura o el pago no se pueden registrar, la mascota sigue dada de baja. Se aplican las reglas RN-03 a RN-10 de CU-22; RN-01 de ese caso se cumple siempre, porque una mascota dada de baja no tiene cobertura vigente. | RF-PLA-10, D2, D3, D101, D107 |
+| **RN-05** | **Reactivación con plan y primer pago, todo o nada.** La mascota vuelve a *Activa* en la misma operación en que se crean la cobertura y el pago de la cuota completa del mes en curso (CU-22). Si la cobertura o el pago no se pueden registrar, la mascota sigue dada de baja. Se aplican las reglas RN-03 a RN-11 de CU-22; RN-01 de ese caso se cumple siempre, porque una mascota dada de baja no tiene cobertura vigente. | RF-PLA-10, D2, D3, D101, D107 |
 | **RN-06** | **Mismo registro, mismo número.** No se crea otra mascota: se reactiva la existente, con el mismo identificador interno y el mismo número de afiliado. Sus coberturas anteriores (con su estado y su motivo de baja), pagos, consumos y auditoría no cambian, y la baja anterior queda en el historial. | RF-MAS-04, RNF-BAJ-02, D23, D45, D107 |
 | **RN-07** | **Cobertura nueva, antigüedad desde cero.** La cobertura nueva empieza con 1 período pago. La antigüedad de las coberturas anteriores no se suma. | RF-PLA-10, D2, D9 |
 | **RN-08** | **Ficha sin cambios.** La reactivación no modifica la ficha: la muestra como quedó al darla de baja y, al confirmar, ofrece actualizarla con CU-14, donde cada cambio queda auditado. La edad aproximada sigue como se cargó. | D41, D85, D118 |
@@ -73,6 +74,7 @@ En todas las excepciones **la mascota sigue dada de baja y no se crea ninguna co
 | **RN-10** | **Una por una.** Reactivar al dueño (CU-11) no reactiva sus mascotas. Cada mascota se reactiva por separado con este caso, también las dadas de baja *por baja del dueño*. | D100, D107 |
 | **RN-11** | **Disponible al instante.** Desde la confirmación, la mascota vuelve a aparecer en la búsqueda del veterinario con su ficha completa y en "Mis mascotas" de su dueño. | RF-ROL-04, RF-ROL-07, D73 |
 | **RN-12** | **Auditoría y una sola vez.** Se registran la reactivación (estado anterior *Dada de baja*, estado nuevo *Activa*), el alta de la cobertura y el pago, con usuario, fecha y hora. Cada confirmación se procesa una sola vez, y si dos administradores reactivan la misma mascota a la vez, se registra una sola reactivación. | RF-TRA-01, RNF-AUD-01, RNF-INT-01 |
+| **RN-13** | **Un solo pago por mes.** Si la mascota ya tiene pagado el mes en curso por la cobertura que se dio de baja ese mes, no se puede reactivar hasta el día 1 del mes siguiente. Es la regla RN-11 de CU-22, validada al iniciar y otra vez al confirmar. | RF-PAG-13, D144 |
 
 ## Datos que se registran
 
@@ -236,6 +238,18 @@ Feature: CU-51 Reactivar mascota
     When el administrador reactiva a "Luna" con el plan "Plan Base" y confirma
     Then "Luna" queda "Activa" con una cobertura nueva "Al día" y 1 período pago
 
+  @EX-10 @RN-13 @RF-PAG-13 @D144
+  Scenario Outline: Una mascota dada de baja con el mes pago se reactiva recién el mes siguiente
+    Given "Luna" fue dada de baja el "15/10/2026 09:00" con motivo "Pedido del dueño" y su última cobertura tenía pagado el período "2026-10", sin deuda
+    And la fecha y hora actual es "<fecha>"
+    When el administrador intenta reactivar a "Luna" con el plan "Plan Base"
+    Then el resultado es "<resultado>"
+
+    Examples:
+      | fecha            | resultado                                                                                                  |
+      | 25/10/2026 10:00 | Luna ya tiene pagado octubre de 2026 por su cobertura anterior. Se le puede asignar un plan desde el 01/11/2026. |
+      | 01/11/2026 10:00 | Luna reactivada con el pago del período 2026-11                                                            |
+
   @EX-03 @RN-04 @D36 @D54
   Scenario: La deuda del dueño se vuelve a validar al confirmar
     Given el administrador "Marta Ruiz" empezó la reactivación de "Luna" y eligió el plan "Plan Base"
@@ -297,6 +311,7 @@ Feature: CU-51 Reactivar mascota
 | RF-TRA-01, RNF-AUD-01 | Paso 9, RN-09, RN-12 |
 | RNF-BAJ-02 | RN-06 |
 | RNF-BAJ-03 | RN-03, EX-01 |
+| RF-PAG-13 | Paso 2, RN-13, EX-10 |
 | RNF-INT-01 | RN-12, EX-06, EX-07 |
 | RNF-USA-01 | Paso 10 |
 | RNF-USA-02 | Paso 6 (una sola confirmación para la reactivación, la cobertura y el pago) |
@@ -310,6 +325,7 @@ Feature: CU-51 Reactivar mascota
 | D36, D54 | RN-04 (revalidación al confirmar), EX-03 |
 | D41, D85, D118 | RN-08 |
 | D117 | RN-09 |
+| D144 | Paso 2, RN-13, EX-10 |
 | D97, D104, D119 | RN-03, EX-01 |
 | D73 | RN-11 |
 | D100 | RN-10 |

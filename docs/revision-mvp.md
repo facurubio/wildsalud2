@@ -31,6 +31,8 @@ Ejemplo: una mascota paga octubre, se da de baja el 20/10 por pedido del dueño 
 
 **Decisión necesaria:** definir si el reingreso se permite ese mes y cómo se cobra. Cambiar la unicidad a cobertura + período sería una solución técnica posible, pero implica admitir dos cuotas de la misma mascota en el mismo mes; no debe introducirse sin decidir esa política comercial. Alternativas: impedir el reingreso hasta el mes siguiente o definir una aplicación del pago ya realizado. Agregar un escenario de aceptación de este recorrido completo.
 
+**Resuelto (05/10/2026):** se mantiene RF-PAG-13 (un pago válido por mascota y período). Si la mascota ya tiene pagado el mes en curso por una cobertura dada de baja, no se le puede asignar un plan ni reactivarla hasta el día 1 del mes siguiente (D144, CU-22 RN-11 y EX-08, CU-51 RN-13 y EX-10).
+
 ### 2. Corrección de pagos entre mascotas con importes distintos
 
 **Origen:** CU-29 FA-01 y RN-02 (versión anterior).
@@ -108,7 +110,7 @@ También aparecen flujos o excepciones sin etiqueta explícita de escenario, por
 
 ## Orden recomendado con Claude Code
 
-1. Resolver los puntos 1 y 3 a 7 (el 2 ya está resuelto) y actualizar decisiones, requisitos y escenarios afectados como una sola tarea de documentación.
+1. Resolver los puntos 3 a 7 (el 1 y el 2 ya están resueltos) y actualizar decisiones, requisitos y escenarios afectados como una sola tarea de documentación.
 2. Cerrar el alcance del piloto y elaborar el modelo de datos, diagramas de estados y un diseño técnico breve.
 3. Construir un recorrido completo: administrador invita personas, crea mascota con plan y pago; veterinario consulta y consume; dueño ve la cobertura y saldo actualizado.
 4. Implementar y probar vencimientos, suspensión, pagos de deuda, baja por deuda, cambios programados y correcciones incluidas en el alcance. Usar un reloj controlable para probar fechas sin esperar meses reales.
