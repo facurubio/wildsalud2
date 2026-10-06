@@ -17,7 +17,10 @@ Leelos antes de implementar un caso de uso. Si el código y los documentos no co
 
 - Next.js 16 (App Router, TypeScript) con Tailwind y shadcn/ui. Diseño **responsive**: todo se usa desde computadora y desde celular.
 - Supabase: base PostgreSQL y Supabase Auth (solo Google en la v1).
-- Publicación en Vercel (plan Hobby), proyecto `wildsalud`, región `gru1` (São Paulo). Cada push a `main` publica en producción (base `wildsalud-prod`); las versiones de prueba usan `wildsalud-dev`. No uses funciones exclusivas de Vercel (cron, KV, Blob, Edge Config): la app tiene que poder mudarse.
+- Publicación en Vercel (plan Hobby), proyecto `wildsalud`, región `gru1` (São Paulo):
+  - rama `dev` → https://wildsalud-git-dev-facurubios-projects.vercel.app (ambiente Preview, base `wildsalud-dev`, protegida con el acceso de Vercel);
+  - rama `main` → https://wildsalud.vercel.app (Production, base `wildsalud-prod`, datos reales).
+- **Forma de trabajo:** todo cambio se sube primero a `dev` y se prueba en su dirección publicada. Pasa a `main` (producción) solo cuando el usuario lo aprueba. No uses funciones exclusivas de Vercel (cron, KV, Blob, Edge Config): la app tiene que poder mudarse.
 
 ## Cómo está armado
 
