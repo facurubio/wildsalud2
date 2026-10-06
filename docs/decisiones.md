@@ -135,6 +135,7 @@ las secciones las agrupan por tema. Un número que no aparece corresponde a una 
 | # | Tema | Decisión |
 |---|------|----------|
 | D69 | Búsqueda de mascotas | Se busca por **nombre de la mascota**, **número de afiliado**, **DNI del dueño** o **apellido del dueño**. Número de afiliado y DNI: coincidencia exacta. Nombre y apellido: coincidencia parcial con un mínimo de **3 letras**. Los resultados se muestran **paginados** de a 20. |
+| D146 | Listado de mascotas del veterinario | Sin texto de búsqueda, el veterinario ve el **listado de todas las mascotas no dadas de baja** de la red, paginado de a 20 y ordenado por nombre, igual que el administrador (D140). La búsqueda por los datos de D69 sigue igual para filtrar. Cada resultado muestra solo lo de CU-37 RN-03: el DNI y el teléfono del dueño se ven únicamente en la ficha. Ajusta D69 y CU-37. |
 | D70 | Datos en los resultados de búsqueda | Los resultados **no muestran el DNI ni el teléfono** del dueño; se ven recién en la ficha. |
 | D71 | Accesos a fichas | **No se registra** en la auditoría cuándo un veterinario abre una ficha. |
 | D72 | Lo que no ve el veterinario en la ficha | No ve el **historial de consumos** de períodos anteriores ni los **cambios de plan pendientes**; solo los consumos del período en curso. |

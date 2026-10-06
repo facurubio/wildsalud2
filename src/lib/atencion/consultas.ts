@@ -19,7 +19,7 @@ export type ResultadoBusqueda = {
 
 // CU-37: mascotas no dadas de baja (RN-01), ordenadas por nombre y de a 20 (RN-04).
 // El DNI y el teléfono del dueño no se devuelven: se ven solo en la ficha (RN-03).
-// Sin criterio ("todas") lista todas las mascotas no dadas de baja: solo para el administrador (D140).
+// Sin criterio ("todas") lista todas las mascotas no dadas de baja (D140, D146).
 export async function buscarMascotas(
   criterio: Exclude<CriterioBusqueda, { tipo: "invalido" }> | { tipo: "todas" },
   pagina: number,

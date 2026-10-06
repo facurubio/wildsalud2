@@ -25,9 +25,9 @@ export default async function PaginaMascotas({ searchParams }: PageProps<"/masco
   const esAdmin = usuario.rol === "administrador";
   const criterio = q.trim() ? interpretarBusqueda(q) : null;
 
-  // Sin texto, el administrador ve todas las mascotas (D140); el veterinario tiene que buscar (D69, CU-37).
+  // Sin texto se listan todas las mascotas no dadas de baja (D140, D146).
   let busqueda: Awaited<ReturnType<typeof buscarMascotas>> | null = null;
-  if (!criterio && esAdmin) {
+  if (!criterio) {
     busqueda = await buscarMascotas({ tipo: "todas" }, pagina, ahora());
   } else if (criterio && criterio.tipo !== "invalido") {
     busqueda = await buscarMascotas(criterio, pagina, ahora());

@@ -14,7 +14,7 @@
 ## Flujo principal
 
 1. El veterinario elige **Buscar mascota**, o llega a esta pantalla al iniciar sesión.
-2. El sistema muestra un único campo de búsqueda.
+2. El sistema muestra un único campo de búsqueda y, debajo, el listado de todas las mascotas no dadas de baja (**RN-08**), paginado de a 20.
 3. El veterinario escribe el número de afiliado de la mascota, el DNI del dueño, el nombre de la mascota o el apellido del dueño.
 4. El sistema valida la búsqueda (**RN-02**) y busca entre las mascotas **no dadas de baja** (**RN-01**).
 5. El sistema muestra los resultados (**RN-03**), ordenados por nombre de la mascota y **paginados** de a 20 (**RN-04**).
@@ -49,6 +49,7 @@
 | **RN-02** | **Criterios de búsqueda.** Nombre de la mascota, número de afiliado de la mascota, DNI del dueño y apellido del dueño. Número de afiliado y DNI: coincidencia exacta. Nombre y apellido: coincidencia parcial, sin distinguir mayúsculas ni acentos, con un mínimo de 3 letras. | RF-MAS-04, D69 |
 | **RN-03** | **Qué muestra cada resultado.** Foto, nombre, especie y raza de la mascota, número de afiliado, nombre y apellido del dueño y estado de cobertura (*Al día*, *Suspendida por falta de pago* o *Sin cobertura vigente*). El DNI y el teléfono del dueño se ven solo en la ficha. | RF-ROL-08, RF-ROL-09, RNF-SEG-01, D70 |
 | **RN-04** | **Paginación y mínimo de letras.** Los resultados se muestran en páginas de 20, con el total encontrado. Las búsquedas por nombre o apellido requieren al menos 3 letras. | RNF-REN-01, RNF-SEG-04, D69 |
+| **RN-08** | **Listado sin búsqueda.** Sin texto de búsqueda se listan todas las mascotas no dadas de baja, ordenadas por nombre y paginadas de a 20, con los mismos datos de RN-03. | D146 |
 | **RN-05** | **Estado calculado en el momento.** El estado de cobertura de cada resultado se calcula con la fecha y hora de la búsqueda. | D54 |
 | **RN-06** | **Rendimiento.** La búsqueda responde en menos de 2 segundos en condiciones normales de uso. | RNF-REN-01, RNF-REN-02 |
 | **RN-07** | **Permisos en el sistema.** El sistema verifica que la cuenta sea de un veterinario activo en cada búsqueda, no solo al iniciar sesión. | RF-AUT-03, RNF-SEG-07 |
@@ -161,6 +162,7 @@ Feature: CU-37 Buscar mascota
 | RNF-SEG-01 | RN-03 |
 | RNF-SEG-04 | RN-04 |
 | D69 | RN-02, RN-04, FA-03, EX-01 |
+| D146 | Paso 2, RN-08 |
 | D70 | RN-03 |
 | D54 | RN-05 |
 | D109 | Relaciones, paso 1 (pantalla de inicio del veterinario) |
